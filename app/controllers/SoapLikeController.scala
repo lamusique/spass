@@ -72,20 +72,6 @@ class SoapLikeController(greetingService: GreetingService,
       // Should find one file
       val resXmlFile = matchedReses.head
 
-//      val resXmlFile = matchedReqs.headOption match {
-//        case Some(file) => {
-//          val requestedFilename = file.name
-//          val allReses = (mappingDir / "xml" / "responses").list(_.extension == Some(".xml")).toSeq
-//          val matchedReses = allReses.filter(_.name == requestedFilename)
-//          logger.info(inspect(matchedReses.size))
-//          matchedReses.headOption match {
-//            case Some(file) => file
-//            case None => mappingDir / "xml" / "responses" / "default.xml"
-//          }
-//        }
-//        case None => mappingDir / "xml" / "responses" / "default.xml"
-//      }
-
       Ok(Xml(resXmlFile.contentAsString))
 
     }.getOrElse {
@@ -94,8 +80,6 @@ class SoapLikeController(greetingService: GreetingService,
   }
 
   def trimXml(xmlContent: String) = xmlContent
-    .replaceAll(">\\s*<", "><")
-    .replaceAll("\\A\\s*", "")
-    .replaceAll("\\s*\\Z", "")
+    .replaceAll(">\\s*<", "><").trim
 
 }
