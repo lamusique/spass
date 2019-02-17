@@ -1,6 +1,8 @@
 
-GET        /api                             controllers.GreeterController.index
+GET        /                             controllers.GreeterController.index
 GET        /greetings                    controllers.GreeterController.greetings
 GET        /greet                        controllers.GreeterController.greetInMyLanguage
 
 GET        /assets/*file                 controllers.Assets.at(path="/public", file)
+
+GET        /*path                        controllers.GeneralController.index(path)
