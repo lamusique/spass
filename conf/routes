@@ -5,4 +5,7 @@ GET        /greet                        controllers.GreeterController.greetInMy
 
 GET        /assets/*file                 controllers.Assets.at(path="/public", file)
 
+POST       /soap                         controllers.SoapLikeController.talkOnXml
+
 GET        /*path                        controllers.GeneralController.index(path)
+

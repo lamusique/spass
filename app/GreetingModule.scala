@@ -1,5 +1,6 @@
 import controllers.GreeterController
 import controllers.GeneralController
+import controllers.SoapLikeController
 import play.api.i18n.Langs
 import play.api.mvc.ControllerComponents
 import services.ServicesModule
@@ -10,6 +11,7 @@ trait GreetingModule extends ServicesModule {
 
   lazy val greeterController = wire[GreeterController]
   lazy val generalController = wire[GeneralController]
+  lazy val soapLikeController = wire[SoapLikeController]
 
   def langs: Langs
 
