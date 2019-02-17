@@ -21,6 +21,19 @@ mock
 
 
 ## How to run
+
+### normal port 9000
+http://localhost:9000/
+- Dev Mode for browser-reload mode:
+```bash
+sbt run
+```
+- Debug Mode
+```bash
+sbt -jvm-debug 9999 run
+```
+### changing the port
+http://localhost:8080/
 - Dev Mode for browser-reload mode:
 ```bash
 sbt "run 8080"
