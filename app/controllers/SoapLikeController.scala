@@ -1,5 +1,6 @@
 package controllers
 
+import play.api.Configuration
 import play.api.i18n.Langs
 import play.api.mvc.{AbstractController, ControllerComponents}
 import play.twirl.api.Html
@@ -8,6 +9,7 @@ import services.GreetingService
 
 class SoapLikeController(greetingService: GreetingService,
                          langs: Langs,
+                         config: Configuration,
                          cc: ControllerComponents) extends AbstractController(cc) {
 
   def talkOnXml = Action { request =>

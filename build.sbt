@@ -13,8 +13,12 @@ scalaVersion := "2.12.8"
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.1" % Test
 libraryDependencies += "com.softwaremill.macwire" %% "macros" % "2.3.1" % "provided"
 
+libraryDependencies += "com.github.pathikrit" %% "better-files" % "3.7.0"
+
+
 //scalacOptions ++= Seq(
 //    "-feature",
 //    "-deprecation",
 //    "-Xfatal-warnings"
 //)
+
