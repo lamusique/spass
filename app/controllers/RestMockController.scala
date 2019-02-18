@@ -21,8 +21,24 @@ class RestMockController(greetingService: GreetingService,
   implicit val encoding = Charset.forName("UTF-8")
 
   def get(path: String) = Action {
+
     val sample = config.get[String]("spass.testing.sample")
     Ok(Html("<h1>get</h1><p>Your requested path is <code>" + path +"</code> and a config value is " + sample + ".</p>"))
+
+    val maybeRootPath = config.getOptional[String]("spass.mapping.rootpath")
+    val mappingDir = maybeRootPath.map(File(_)).getOrElse(cwd / "mapping")
+    val restGetDir = mappingDir / "rest" / "get"
+
+    // Assume a URI is TYPE/ID.
+    val splitted = path.split("/")
+    val file = restGetDir / splitted(0) / (splitted(1) + ".xml")
+
+    if(file.exists) {
+      Ok(Xml(file.contentAsString))
+    } else {
+      Ok(Html("<h1>get</h1><p>Your requested path is <code>" + path +"</code> and a config value is " + sample + ".</p>"))
+    }
+
   }
 
   def post(path: String) = Action {
