@@ -1,3 +1,4 @@
+// Spaß
 name := """spass"""
 
 version := "0.1.0"
