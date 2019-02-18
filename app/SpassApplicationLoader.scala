@@ -16,12 +16,12 @@ class GreetingApplicationLoader extends ApplicationLoader {
     LoggerConfigurator(context.environment.classLoader).foreach {
       _.configure(context.environment, context.initialConfiguration, Map.empty)
     }
-    new GreetingComponents(context).application
+    new SpassComponents(context).application
   }
 }
 
-class GreetingComponents(context: Context) extends BuiltInComponentsFromContext(context)
-  with GreetingModule
+class SpassComponents(context: Context) extends BuiltInComponentsFromContext(context)
+  with SpassModule
   with AssetsComponents
   with I18nComponents 
   with play.filters.HttpFiltersComponents {
