@@ -11,7 +11,7 @@ import router.Routes
 /**
  * Application loader that wires up the application dependencies using Macwire
  */
-class GreetingApplicationLoader extends ApplicationLoader {
+class SpassApplicationLoader extends ApplicationLoader {
   def load(context: Context): Application = {
     LoggerConfigurator(context.environment.classLoader).foreach {
       _.configure(context.environment, context.initialConfiguration, Map.empty)

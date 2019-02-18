@@ -1,7 +1,4 @@
-import controllers.GreeterController
-import controllers.GeneralController
-import controllers.SoapMockController
-import controllers.RestMockController
+import controllers._
 import play.api.Configuration
 import play.api.i18n.Langs
 import play.api.mvc.ControllerComponents
@@ -15,8 +12,12 @@ trait SpassModule extends ServicesModule {
   lazy val generalController = wire[GeneralController]
   lazy val soapMockController = wire[SoapMockController]
   lazy val restMockController = wire[RestMockController]
+  lazy val homeController = wire[HomeController]
 
   def langs: Langs
   def configuration: Configuration
   def controllerComponents: ControllerComponents
+  implicit def assetsFinder: AssetsFinder
+
 }
+

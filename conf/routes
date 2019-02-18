@@ -1,5 +1,7 @@
 
-GET        /                             controllers.GreeterController.index
+GET        /                             controllers.HomeController.index
+
+GET        /index                        controllers.GreeterController.index
 GET        /greetings                    controllers.GreeterController.greetings
 GET        /greet                        controllers.GreeterController.greetInMyLanguage
 
