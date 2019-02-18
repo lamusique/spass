@@ -7,7 +7,7 @@ import play.api.i18n.Langs
 import play.api.mvc.ControllerComponents
 import services.ServicesModule
 
-trait GreetingModule extends ServicesModule {
+trait SpassModule extends ServicesModule {
 
   import com.softwaremill.macwire._
 
