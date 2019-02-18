@@ -48,8 +48,9 @@ class SoapMockController(greetingService: GreetingService,
 
       val maybeRootPath = config.getOptional[String]("spass.mapping.rootpath")
       val mappingDir = maybeRootPath.map(File(_)).getOrElse(cwd / "mapping")
+      val soapDir = mappingDir / "soap"
 
-      val allReqs = (mappingDir / "xml" / "requests").list(_.extension == Some(".xml")).toSeq
+      val allReqs = (soapDir / "requests").list(_.extension == Some(".xml")).toSeq
       val matchedReqs = allReqs.filter(file => {
         val expectedXmlContent = file.contentAsString
         val trimmedExpectedXml = trimXml(expectedXmlContent)
@@ -66,7 +67,7 @@ class SoapMockController(greetingService: GreetingService,
         case None => "default.xml"
       }
 
-      val allReses = (mappingDir / "xml" / "responses").list(_.extension == Some(".xml")).toSeq
+      val allReses = (soapDir / "responses").list(_.extension == Some(".xml")).toSeq
       val matchedReses = allReses.filter(_.name == requestedFilename)
       logger.info(inspect(matchedReses.size))
       // Should find one file
