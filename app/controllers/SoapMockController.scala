@@ -14,7 +14,7 @@ import better.files.Dsl._
 
 import utils.CodeUtility._
 
-class SoapLikeController(greetingService: GreetingService,
+class SoapMockController(greetingService: GreetingService,
                          langs: Langs,
                          config: Configuration,
                          cc: ControllerComponents) extends AbstractController(cc) {

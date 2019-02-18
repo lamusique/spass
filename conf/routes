@@ -5,8 +5,15 @@ GET        /greet                        controllers.GreeterController.greetInMy
 
 GET        /assets/*file                 controllers.Assets.at(path="/public", file)
 
-POST       /soap                         controllers.SoapLikeController.mapXml
-POST       /soap/test                    controllers.SoapLikeController.talkOnXml
+# SOAP
+POST       /soap                         controllers.SoapMockController.mapXml
+POST       /soap/test                    controllers.SoapMockController.talkOnXml
+
+# REST
+GET        /rest/*path                   controllers.RestMockController.get(path)
+POST       /rest/*path                   controllers.RestMockController.post(path)
+PUT        /rest/*path                   controllers.RestMockController.put(path)
+DELETE     /rest/*path                   controllers.RestMockController.delete(path)
 
 GET        /*path                        controllers.GeneralController.index(path)
 
