@@ -19,7 +19,7 @@ class HomeController (cc: ControllerComponents) (implicit assetsFinder: AssetsFi
     * a path of `/`.
     */
   def index = Action {
-    Ok(views.html.index("Your new application is ready."))
+    Ok(views.html.index("A mock server Spaß is ready."))
   }
 
 }
