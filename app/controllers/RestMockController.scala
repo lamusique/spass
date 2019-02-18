@@ -22,22 +22,22 @@ class RestMockController(greetingService: GreetingService,
 
   def get(path: String) = Action {
     val sample = config.get[String]("spass.testing.sample")
-    Ok(Html("<h1>Welcome</h1><p>Your requested path is <code>" + path +"</code> and a config value is " + sample + ".</p>"))
+    Ok(Html("<h1>get</h1><p>Your requested path is <code>" + path +"</code> and a config value is " + sample + ".</p>"))
   }
 
   def post(path: String) = Action {
     val sample = config.get[String]("spass.testing.sample")
-    Ok(Html("<h1>Welcome</h1><p>Your requested path is <code>" + path +"</code> and a config value is " + sample + ".</p>"))
+    Created(Html("<h1>post</h1><p>Your requested path is <code>" + path +"</code> and a config value is " + sample + ".</p>"))
   }
 
   def put(path: String) = Action {
     val sample = config.get[String]("spass.testing.sample")
-    Ok(Html("<h1>Welcome</h1><p>Your requested path is <code>" + path +"</code> and a config value is " + sample + ".</p>"))
+    Ok(Html("<h1>put</h1><p>Your requested path is <code>" + path +"</code> and a config value is " + sample + ".</p>"))
   }
 
   def delete(path: String) = Action {
     val sample = config.get[String]("spass.testing.sample")
-    Ok(Html("<h1>Welcome</h1><p>Your requested path is <code>" + path +"</code> and a config value is " + sample + ".</p>"))
+    Ok(Html("<h1>delete</h1><p>Your requested path is <code>" + path +"</code> and a config value is " + sample + ".</p>"))
   }
 
 }
