@@ -1,4 +1,5 @@
 import controllers._
+import filters.NegativeFilter
 import play.api.Configuration
 import play.api.i18n.Langs
 import play.api.mvc.ControllerComponents

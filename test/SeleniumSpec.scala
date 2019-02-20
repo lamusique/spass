@@ -4,7 +4,7 @@ class SeleniumSpec
   extends PlaySpec
   with BaseOneServerPerTest
   with OneBrowserPerTest
-  with GreeterApplicationFactory
+  with SpassApplicationFactory
   with HtmlUnitFactory {
 
   "SeleniumSpec" should {

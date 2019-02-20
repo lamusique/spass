@@ -6,7 +6,7 @@ import play.api.test.WsTestClient
 
 class ServerSpec extends PlaySpec
   with BaseOneServerPerSuite
-  with GreeterApplicationFactory
+  with SpassApplicationFactory
   with Results
   with ScalaFutures
   with IntegrationPatience {

@@ -1,12 +1,15 @@
 
 import _root_.controllers.AssetsComponents
 import com.softwaremill.macwire._
+import filters.NegativeFilter
 import play.api.ApplicationLoader.Context
 import play.api._
 import play.api.i18n._
 import play.api.mvc._
 import play.api.routing.Router
 import router.Routes
+
+import scala.concurrent.ExecutionContext
 
 /**
  * Application loader that wires up the application dependencies using Macwire
@@ -31,9 +34,21 @@ class SpassComponents(context: Context) extends BuiltInComponentsFromContext(con
     _.configure(context.environment, context.initialConfiguration, Map.empty)
   }
 
+  // filters
+  lazy val negativeFilter = wire[NegativeFilter]
+
+  override def httpFilters: Seq[EssentialFilter] = {
+    super.httpFilters :+ negativeFilter
+  }
+
   lazy val router: Router = {
     // add the prefix string in local scope for the Routes constructor
     val prefix: String = "/"
     wire[Routes]
   }
+
+//  implicit val configuration: Configuration
+//  implicit val ec: ExecutionContext
+
+
 }
