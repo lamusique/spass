@@ -3,17 +3,17 @@ import play.api.inject.DefaultApplicationLifecycle
 import play.api.{Application, ApplicationLoader, Configuration, Environment}
 import play.core.DefaultWebCommands
 
-trait GreeterApplicationFactory extends FakeApplicationFactory {
+trait SpassApplicationFactory extends FakeApplicationFactory {
 
-  private class GreetingApplicationBuilder {
+  private class SpassApplicationBuilder {
     def build(): Application = {
       val env = Environment.simple()
       val context = ApplicationLoader.Context.create(env)
-      val loader = new GreetingApplicationLoader()
+      val loader = new SpassApplicationLoader()
       loader.load(context)
     }
   }
 
-  def fakeApplication(): Application = new GreetingApplicationBuilder().build()
+  def fakeApplication(): Application = new SpassApplicationBuilder().build()
 
 }
