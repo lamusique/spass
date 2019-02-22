@@ -80,7 +80,7 @@ $ sbt "run 8080"
 
 ### REST
 - `./mapping/rest/[type name]/`
-    - 001.xml ←sample
+    - `001.xml` ←sample
     - Put here an expected request XML. Several files are allowed.
     - For instance requesting `http://localhost:9000/rest/users/001` seeks a response in `./mapping/rest/users/001.xml`
 
