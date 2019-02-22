@@ -26,8 +26,11 @@ class SoapMockController(greetingService: GreetingService,
   def talkOnXml = Action { request =>
     request.body.asXml.map { xml =>
 
-      logger.info("xml=" + xml.toString)
-      logger.info("trimmed xml=" + xml.toString.replaceAll(">\\s*<", "><"))
+      logger.info("requested XML:\n"
+        + "=" * 16
+        + xml.toString
+        + "=" * 16)
+      logger.info("trimmed requested XML=" + xml.toString.replaceAll(">\\s*<", "><"))
 
       (xml \\ "name" headOption).map(_.text).map { name =>
         Ok(Xml("<xml><title>Welcome</title><content>You requested XML file and its name is " + name + "</content></xml>"))
@@ -42,9 +45,13 @@ class SoapMockController(greetingService: GreetingService,
   def mapXml = Action { request =>
     request.body.asXml.map { xml =>
 
-      logger.info("xml=" + xml.toString)
+      logger.info("requested XML:\n"
+        + "=" * 16
+        + xml.toString
+        + "=" * 16)
+
       val trimmedReqXml = trimXml(xml.toString)
-      logger.info("trimmed xml=" + trimmedReqXml)
+      logger.info("trimmed requested XML=" + trimmedReqXml)
 
       val maybeRootPath = config.getOptional[String]("spass.mapping.rootpath")
       val mappingDir = maybeRootPath.map(File(_)).getOrElse(cwd / "mapping")
@@ -72,6 +79,11 @@ class SoapMockController(greetingService: GreetingService,
       logger.info(inspect(matchedReses.size))
       // Should find one file
       val resXmlFile = matchedReses.head
+
+      logger.info("matched response XML:\n"
+        + "=" * 16
+        + resXmlFile.contentAsString
+        + "=" * 16)
 
       Ok(Xml(resXmlFile.contentAsString))
 
