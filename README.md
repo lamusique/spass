@@ -4,7 +4,9 @@ A Mock Service Server over HTTP
 
 ## Description
 This is a standalone server which mocks HTTP communication for testing use.
-
+1. SOAP
+1. REST
+1. Classic GET
 
 ## name origin
 Spaß /ʃpaːs/
