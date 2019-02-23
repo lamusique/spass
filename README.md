@@ -4,7 +4,9 @@ A Mock Service Server over HTTP
 
 ## Description
 This is a standalone server which mocks HTTP communication for testing use.
-
+1. SOAP
+1. REST
+1. Classic GET
 
 ## name origin
 Spaß /ʃpaːs/
@@ -78,9 +80,9 @@ $ sbt "run 8080"
 
 ### REST
 - `./mapping/rest/[type name]/`
-    - 001.xml ←sample
+    - `001.xml` ←sample
     - Put here an expected request XML. Several files are allowed.
-    - For instance requesting `http://localhost:9000/rest/users/001` is for put a response in `./mapping/rest/users/001.xml`
+    - For instance requesting `http://localhost:9000/rest/users/001` seeks a response in `./mapping/rest/users/001.xml`
 
 ### Config
 `mapping` directory is changeable.
