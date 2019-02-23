@@ -12,7 +12,7 @@ import play.twirl.api.{Html, Xml}
 import services.GreetingService
 import utils.CodeUtility._
 
-class RestMockController(greetingService: GreetingService,
+class ClassicUriController(greetingService: GreetingService,
                          langs: Langs,
                          config: Configuration,
                          cc: ControllerComponents) extends AbstractController(cc) with WebServiceController {
@@ -20,7 +20,10 @@ class RestMockController(greetingService: GreetingService,
   private val logger = Logger(getClass)
 
 
-  def get(path: String) = Action {implicit request =>
+  def classicGet(path: String) = Action {implicit request =>
+
+    //request.queryString
+
 
     val maybeRootPath = config.getOptional[String]("spass.mapping.rootpath")
     val mappingDir = maybeRootPath.map(File(_)).getOrElse(cwd / "mapping")
@@ -59,11 +62,11 @@ class RestMockController(greetingService: GreetingService,
 
 
   def contentType(request: Request[AnyContent]) = {
-      request.contentType.map(_.toLowerCase) match {
-        case Some("application/json") | Some("text/json") => "JSON"
-        case Some("application/xml") | Some("text/xml") => "XML"
-        case _ => None
-      }
+    request.contentType.map(_.toLowerCase) match {
+      case Some("application/json") | Some("text/json") => "JSON"
+      case Some("application/xml") | Some("text/xml") => "XML"
+      case _ => None
+    }
   }
   def acceptType(request: Request[AnyContent]) = {
     if (request.accepts(MimeTypes.XML)) {
@@ -74,24 +77,6 @@ class RestMockController(greetingService: GreetingService,
       //code
     }
   }
-
-
-  def getXML(path: String) = get(path)
-
-  def postXML(path: String) = post(path)
-
-  def putXML(path: String) = put(path)
-
-  def deleteXML(path: String) = delete(path)
-
-
-  def getJSON(path: String) = get(path)
-
-  def postJSON(path: String) = post(path)
-
-  def putJSON(path: String) = put(path)
-
-  def deleteJSON(path: String) = delete(path)
 
 
 }

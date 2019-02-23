@@ -17,11 +17,10 @@ import utils.CodeUtility._
 class SoapMockController(greetingService: GreetingService,
                          langs: Langs,
                          config: Configuration,
-                         cc: ControllerComponents) extends AbstractController(cc) {
+                         cc: ControllerComponents) extends AbstractController(cc) with WebServiceController {
 
   private val logger = Logger(getClass)
 
-  implicit val encoding = Charset.forName("UTF-8")
 
   def talkOnXml = Action { request =>
     request.body.asXml.map { xml =>
