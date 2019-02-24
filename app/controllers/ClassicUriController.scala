@@ -39,17 +39,7 @@ class ClassicUriController(greetingService: GreetingService,
 
     // Assume a URI is not /type[/type/..]/ID but /type[/type/..]
     val splitted = path.split("/")
-//    val reqFileDir = splitted match {
-//      case Array(_) => splitted.dropRight(1).foldLeft(classicGetDir)((z, n) => z / n)
-//      case Array() => classicGetDir
-//    }
-//
-//    val resFileDir = splitted.dropRight(1).foldLeft(classicGetDir)((z, n) => z / n)
-//    val file = resFileDir / (splitted.last + ext)
-
     val classicGetFileDir = splitted.foldLeft(classicGetDir)((z, n) => z / n)
-//    val file = reqFileDir / (splitted.last + ext)
-
 
     val allReqs = (classicGetFileDir / "requests").list(_.extension == Some(".conf")).toSeq
     import collection.JavaConverters._
@@ -86,10 +76,10 @@ class ClassicUriController(greetingService: GreetingService,
 
     val requestedFilename = matchedReqs.headOption match {
       case Some(file) => file.name.dropRight(4) + "xml"
-      case None => "default.xml"
+      case None => "default." + ext
     }
 
-    val allReses = (classicGetFileDir / "responses").list(_.extension == Some(".xml")).toSeq
+    val allReses = (classicGetFileDir / "responses").list(_.extension == Some("." + ext)).toSeq
     val matchedReses = allReses.filter(_.name == requestedFilename)
     logger.info(inspect(matchedReses.size))
     // Should find one file
