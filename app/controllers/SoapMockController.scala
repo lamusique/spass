@@ -57,8 +57,8 @@ class SoapMockController(greetingService: GreetingService,
       val mappingDir = maybeRootPath.map(File(_)).getOrElse(cwd / "mapping")
       val soapDir = mappingDir / "soap"
 
-      val allReqs = (soapDir / "requests").list(_.extension == Some(".xml")).toSeq
-      val matchedReqs = allReqs.filter(file => {
+      val allXMLReqs = (soapDir / "requests").list(_.extension == Some(".xml")).toSeq
+      val matchedXMLReqs = allXMLReqs.filter(file => {
         val expectedXmlContent = file.contentAsString
         val trimmedExpectedXml = trimXml(expectedXmlContent)
 
@@ -67,10 +67,26 @@ class SoapMockController(greetingService: GreetingService,
         logger.info(inspect(trimmedReqXml == trimmedExpectedXml))
         trimmedReqXml == trimmedExpectedXml
       })
-      logger.info(inspect(matchedReqs.size))
+      logger.info(inspect(matchedXMLReqs.size))
+
+      val matchedReqs = if (matchedXMLReqs.isEmpty) {
+        // try to find by RegEx
+        val allRegexReqs = (soapDir / "requests").list(_.extension == Some(".regex")).toSeq
+        val matchedReqs = allRegexReqs.filter(file => {
+        val expectedRegexContent = file.contentAsString
+
+        logger.debug(inspect(expectedRegexContent))
+        logger.debug(inspect(trimmedReqXml))
+        val matches = trimmedReqXml.matches(expectedRegexContent)
+        logger.debug(inspect(matches))
+        matches
+      })
+        matchedReqs
+
+      } else matchedXMLReqs
 
       val requestedFilename = matchedReqs.headOption match {
-        case Some(file) => file.name
+        case Some(file) => file.name.dropRight(file.extension.get.size - 1) + "xml"
         case None => "default.xml"
       }
 
