@@ -96,13 +96,19 @@ spass.mapping.rootpath=C:\\mock\\mapping
 
 ### SOAP
 http://localhost:9000/soap
-When posing to the URI above, it searchs and returns a corresponding XML.
-1. Check if the same XML in `./mapping/soap/requests` exists as one in a request.
+- When posing to the URI above, it searchs and returns a corresponding XML.
+1. It checks if the same XML in `./mapping/soap/requests` exists as one in a request.
+1. It tries exact match with `*.xml` and then tries RegEx match with `*.regex`.
 1. If they are matched, it returns an XML in `./mapping/soap/responses` with the same filename as in the request directory.
 1. If they not are matched, it returns `./mapping/soap/responses/default.xml`.
 
 ### REST
 http://localhost:9000/rest
-1. When requesting GET /[type name]/id (e.g. http://localhost:9000/rest/users/001) it searches and returns an XML in the same directory structure as a requested URI.
-1. When requesting http://localhost:9000/rest/** (any path) in the POST/PUT/DELETE method, it returns a successful HTTP status code.
+1. When requesting GET /[type name]/id (e.g. http://localhost:9000/rest/users/001) it searches and returns an XML/JSON in the same directory structure as a requested URI.
+
+### Classic GET
+http://localhost:9000/classic?[key]=[value](&...)
+- When getting to the URI above, it searchs and returns a corresponding XML, at present not a JSON.
+1. When requesting GET with query strings or even with a deep link /[type name]/id (e.g. http://localhost:9000/rest/users/001) it searches parameter files `*.conf` and tries to match queries between a request and an expection in `./mapping/classic/get[/...]/requests`.
+1. It returns a matched response.
 
