@@ -1,6 +1,12 @@
-
 # Spaß
 A Mock Service Server over HTTP
+
+
+## Description
+This is a standalone server which mocks HTTP communication for testing use.
+1. SOAP
+1. REST
+1. Classic GET
 
 ## name origin
 Spaß /ʃpaːs/
@@ -20,30 +26,83 @@ late Middle English: from Old French mocquer ‘deride’; Modern French ‘mocq
 mock
 
 
+### Features
+
+#### MVP feautures
+1. It responds to a request with a fixed XML.
+
+#### Features
+1. SOAP mock
+    1. It responds with an XML put in a SOAP response directory if a request is identical to an XML in a SOAP request directory except for \s (whitespaces / line breaks) between tags.
+        1.  It responds with a default XML put in a SOAP response directory if a request is not identical. This is the same feature of MVP's.
+1. REST mock
+1. classic GET mock with query strings
+
+
+## Preparation
+1. Install sbt
+    - via official site [https://www.scala-sbt.org/download.html](https://www.scala-sbt.org/download.html), (Scoop)[https://scoop.sh/] for Windows or (Home Brew)[https://brew.sh/] for macOS.
+1. To build this app you need the Internet in order to download libraries.
+1. Clone this repo.
+
+
 ## How to run
 
-### normal port 9000
+```bash
+$ cd [cloned directory]
+```
+
+### by default port 9000
 http://localhost:9000/
 - Dev Mode for browser-reload mode:
 ```bash
-sbt run
+$ sbt run
 ```
-- Debug Mode
-```bash
-sbt -jvm-debug 9999 run
-```
+
 ### changing the port
+e.g. 8080
 http://localhost:8080/
 - Dev Mode for browser-reload mode:
 ```bash
-sbt "run 8080"
+$ sbt "run 8080"
 ```
-- Debug Mode; To run in debug mode with the http listener on port 8080, run:
-```bash
-sbt -jvm-debug 9999 "run 8080"
+
+
+## Settings
+### SOAP
+- `./mapping/soap/requests`
+    - `001.xml` ←sample
+    - Put here an expected request XML. Several files are allowed.
+- `./mapping/soap/responses`
+    - `001.xml` ←sample
+    - `default.xml`
+    - Put here an expected response XML. Several files are allowed.
+
+### REST
+- `./mapping/rest/[type name]/`
+    - `001.xml` ←sample
+    - Put here an expected request XML. Several files are allowed.
+    - For instance requesting `http://localhost:9000/rest/users/001` seeks a response in `./mapping/rest/users/001.xml`
+
+### Config
+`mapping` directory is changeable.
+Configure the following key in `./conf/application.conf`
+```conf
+spass.mapping.rootpath=C:\\mock\\mapping
 ```
-- Prod Mode
-```bash
-sbt "start -Dhttp.port=8080"
-```
+
+
+## Usage
+
+### SOAP
+http://localhost:9000/soap
+When posing to the URI above, it searchs and returns a corresponding XML.
+1. Check if the same XML in `./mapping/soap/requests` exists as one in a request.
+1. If they are matched, it returns an XML in `./mapping/soap/responses` with the same filename as in the request directory.
+1. If they not are matched, it returns `./mapping/soap/responses/default.xml`.
+
+### REST
+http://localhost:9000/rest
+1. When requesting GET /[type name]/id (e.g. http://localhost:9000/rest/users/001) it searches and returns an XML in the same directory structure as a requested URI.
+1. When requesting http://localhost:9000/rest/** (any path) in the POST/PUT/DELETE method, it returns a successful HTTP status code.
 

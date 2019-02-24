@@ -15,10 +15,28 @@ import scala.concurrent.ExecutionContext
  * Application loader that wires up the application dependencies using Macwire
  */
 class SpassApplicationLoader extends ApplicationLoader {
+
+  private val logger = Logger(getClass)
+
   def load(context: Context): Application = {
     LoggerConfigurator(context.environment.classLoader).foreach {
       _.configure(context.environment, context.initialConfiguration, Map.empty)
     }
+
+//    logger.info(Console.RED_B + Console.UNDERLINED + "This is red." + Console.RESET)
+    logger.info(
+      """
+        | _______                ______
+        ||     __|.-----..---.-.|   __ \
+        ||__     ||  _  ||  _  ||   __ <
+        ||_______||   __||___._||  ____/
+        |         |__|          |__|
+        |
+        |------------- Spaß ------------
+        ||  a mock web service server  |
+        |-------------------------------
+        |""".stripMargin)
+
     new SpassComponents(context).application
   }
 }
@@ -33,6 +51,9 @@ class SpassComponents(context: Context) extends BuiltInComponentsFromContext(con
   LoggerConfigurator(context.environment.classLoader).foreach {
     _.configure(context.environment, context.initialConfiguration, Map.empty)
   }
+
+  private val logger = Logger(getClass)
+
 
   // filters
   lazy val negativeFilter = wire[NegativeFilter]
@@ -50,5 +71,6 @@ class SpassComponents(context: Context) extends BuiltInComponentsFromContext(con
 //  implicit val configuration: Configuration
 //  implicit val ec: ExecutionContext
 
+//  logger.debug(configuration.toString)
 
 }

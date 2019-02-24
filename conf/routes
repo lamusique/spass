@@ -1,21 +1,43 @@
 
 GET        /                             controllers.HomeController.index
 
+
 GET        /index                        controllers.GreeterController.index
 GET        /greetings                    controllers.GreeterController.greetings
 GET        /greet                        controllers.GreeterController.greetInMyLanguage
 
 GET        /assets/*file                 controllers.Assets.at(path="/public", file)
 
+
 # SOAP
 POST       /soap                         controllers.SoapMockController.mapXml
 POST       /soap/test                    controllers.SoapMockController.talkOnXml
 
+
+# REST specifying XML
+GET        /rest/xml/*path               controllers.RestMockController.getXML(path)
+POST       /rest/xml/*path               controllers.RestMockController.postXML(path)
+PUT        /rest/xml/*path               controllers.RestMockController.putXML(path)
+DELETE     /rest/xml/*path               controllers.RestMockController.deleteXML(path)
+
+# REST specifying JSON
+GET        /rest/json/*path              controllers.RestMockController.getJSON(path)
+POST       /rest/json/*path              controllers.RestMockController.postJSON(path)
+PUT        /rest/json/*path              controllers.RestMockController.putJSON(path)
+DELETE     /rest/json/*path              controllers.RestMockController.deleteJSON(path)
+
 # REST
-GET        /rest/*path                   controllers.RestMockController.get(path)
-POST       /rest/*path                   controllers.RestMockController.post(path)
-PUT        /rest/*path                   controllers.RestMockController.put(path)
-DELETE     /rest/*path                   controllers.RestMockController.delete(path)
+GET        /rest/*path                   controllers.RestMockController.doHttpMethods(path, extensionHint ?= null)
+POST       /rest/*path                   controllers.RestMockController.doHttpMethods(path, extensionHint ?= null)
+PUT        /rest/*path                   controllers.RestMockController.doHttpMethods(path, extensionHint ?= null)
+DELETE     /rest/*path                   controllers.RestMockController.doHttpMethods(path, extensionHint ?= null)
+
+
+# Classic GET with query strings plus SOAP
+GET        /classic/*path                controllers.ClassicUriController.classicGetWithStructure(path)
+POST       /classic                      controllers.SoapMockController.mapXml
+GET        /classic                      controllers.ClassicUriController.classicGet
+
 
 GET        /*path                        controllers.GeneralController.index(path)
 

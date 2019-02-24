@@ -14,6 +14,7 @@ trait SpassModule extends ServicesModule {
   lazy val soapMockController = wire[SoapMockController]
   lazy val restMockController = wire[RestMockController]
   lazy val homeController = wire[HomeController]
+  lazy val classicUriController = wire[ClassicUriController]
 
   def langs: Langs
   def configuration: Configuration

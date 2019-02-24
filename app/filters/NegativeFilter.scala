@@ -31,6 +31,7 @@ class NegativeFilter(config: Configuration)(implicit ec: ExecutionContext) exten
       case Some(mode) => "on" == mode
       case None => false
     }
+    logger.debug(inspect(isNegative))
 
     if (isNegative) {
 
@@ -39,6 +40,7 @@ class NegativeFilter(config: Configuration)(implicit ec: ExecutionContext) exten
       // wait millis setting is prior to status code
         maybeWaitMillis match {
           case Some(waitMillis) => {
+            logger.debug(inspect(waitMillis))
             // a blocking point
             Thread.sleep(waitMillis.toLong)
             success(List("X-Spass-Mock-Mode" -> "NegativeWait", "X-Spass-WaitMillis" -> waitMillis))
@@ -49,6 +51,7 @@ class NegativeFilter(config: Configuration)(implicit ec: ExecutionContext) exten
               val code = config.get[String]("negative.code")
               val status = new Status(code.toInt)
               val errorStatusCode = status(code)
+              logger.debug(inspect(errorStatusCode))
               errorStatusCode
                 .withHeaders("X-Spass-Response-Data" -> "mock")
                 .withHeaders("X-Spass-Mock-Mode" -> "NegativeStatusCode")

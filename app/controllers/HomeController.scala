@@ -1,7 +1,7 @@
 package controllers
 
 import javax.inject._
-
+import play.api.Logger
 import play.api.mvc._
 
 /**
@@ -12,6 +12,8 @@ import play.api.mvc._
 class HomeController (cc: ControllerComponents) (implicit assetsFinder: AssetsFinder)
   extends AbstractController(cc) {
 
+  private val logger = Logger(getClass)
+
   /**
     * Create an Action to render an HTML page with a welcome message.
     * The configuration in the `routes` file means that this method
@@ -19,6 +21,7 @@ class HomeController (cc: ControllerComponents) (implicit assetsFinder: AssetsFi
     * a path of `/`.
     */
   def index = Action {
+    logger.debug(this.getClass.toString)
     Ok(views.html.index("A mock server Spaß is ready."))
   }
 
