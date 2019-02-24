@@ -45,10 +45,7 @@ class SoapMockController(greetingService: GreetingService,
   def mapXml = Action { request =>
     request.body.asXml.map { xml =>
 
-      logger.info("requested XML:\n"
-      + "=" * 8 + " Requested " + "=" * 8 + Console.CYAN
-      + xml.toString
-      + "=" * 27 + Console.RESET)
+      logger.info(wrapForLogging("Requested XML", xml.toString))
 
       val trimmedReqXml = trimXml(xml.toString)
       logger.info("trimmed requested XML=" + trimmedReqXml)
@@ -62,15 +59,16 @@ class SoapMockController(greetingService: GreetingService,
         val expectedXmlContent = file.contentAsString
         val trimmedExpectedXml = trimXml(expectedXmlContent)
 
-        logger.info(inspect(trimmedReqXml))
-        logger.info(inspect(trimmedExpectedXml))
-        logger.info(inspect(trimmedReqXml == trimmedExpectedXml))
+        logger.debug(inspect(trimmedReqXml))
+        logger.debug(inspect(trimmedExpectedXml))
+        logger.debug(inspect(trimmedReqXml == trimmedExpectedXml))
         trimmedReqXml == trimmedExpectedXml
       })
-      logger.info(inspect(matchedXMLReqs.size))
+      logger.debug(inspect(matchedXMLReqs.size))
 
       val matchedReqs = if (matchedXMLReqs.isEmpty) {
         // try to find by RegEx
+        logger.debug("Exact matching failed and then try to find an expectation by RegEx.")
         val allRegexReqs = (soapDir / "requests").list(_.extension == Some(".regex")).toSeq
         val matchedReqs = allRegexReqs.filter(file => {
         val expectedRegexContent = file.contentAsString
@@ -92,16 +90,12 @@ class SoapMockController(greetingService: GreetingService,
 
       val allReses = (soapDir / "responses").list(_.extension == Some(".xml")).toSeq
       val matchedReses = allReses.filter(_.name == requestedFilename)
-      logger.info(inspect(matchedReses.size))
+      logger.debug(inspect(matchedReses.size))
       // Should find one file
       val resXmlFile = matchedReses.head
-
-      logger.info("matched response XML:\n"
-      + "=" * 8 + " To respond with " + "=" * 8 + Console.CYAN
-      + resXmlFile.contentAsString
-      + "=" * 27 + Console.RESET)
-
-      Ok(Xml(resXmlFile.contentAsString))
+      val content = resXmlFile.contentAsString
+      logger.info(wrapForLogging("Response to put back", content))
+      Ok(Xml(content))
 
     }.getOrElse {
       BadRequest("Expecting Xml data")
