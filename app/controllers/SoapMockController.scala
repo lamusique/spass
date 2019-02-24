@@ -26,10 +26,11 @@ class SoapMockController(greetingService: GreetingService,
     request.body.asXml.map { xml =>
 
       logger.info("requested XML:\n"
-        + "=" * 16
+        + "=" * 16 + Console.CYAN
         + xml.toString
-        + "=" * 16)
-      logger.info("trimmed requested XML=" + xml.toString.replaceAll(">\\s*<", "><"))
+        + "=" * 16 + Console.RESET)
+      val trimmedReqXml = trimXml(xml.toString)
+      logger.info("trimmed requested XML=" + trimmedReqXml)
 
       (xml \\ "name" headOption).map(_.text).map { name =>
         Ok(Xml("<xml><title>Welcome</title><content>You requested XML file and its name is " + name + "</content></xml>"))
@@ -45,9 +46,9 @@ class SoapMockController(greetingService: GreetingService,
     request.body.asXml.map { xml =>
 
       logger.info("requested XML:\n"
-        + "=" * 16
-        + xml.toString
-        + "=" * 16)
+      + "=" * 8 + " Requested " + "=" * 8 + Console.CYAN
+      + xml.toString
+      + "=" * 27 + Console.RESET)
 
       val trimmedReqXml = trimXml(xml.toString)
       logger.info("trimmed requested XML=" + trimmedReqXml)
@@ -80,9 +81,9 @@ class SoapMockController(greetingService: GreetingService,
       val resXmlFile = matchedReses.head
 
       logger.info("matched response XML:\n"
-        + "=" * 16
-        + resXmlFile.contentAsString
-        + "=" * 16)
+      + "=" * 8 + " To respond with " + "=" * 8 + Console.CYAN
+      + resXmlFile.contentAsString
+      + "=" * 27 + Console.RESET)
 
       Ok(Xml(resXmlFile.contentAsString))
 
@@ -90,8 +91,5 @@ class SoapMockController(greetingService: GreetingService,
       BadRequest("Expecting Xml data")
     }
   }
-
-  def trimXml(xmlContent: String) = xmlContent
-    .replaceAll(">\\s*<", "><").trim
 
 }

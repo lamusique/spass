@@ -20,18 +20,19 @@ class RestMockController(greetingService: GreetingService,
   private val logger = Logger(getClass)
 
 
-  def get(path: String) = Action {implicit request =>
+  def get(path: String, ext: String = "xml") = Action {implicit request =>
+
+    logger.debug(inspect(path))
+    logger.debug(inspect(ext))
 
     val maybeRootPath = config.getOptional[String]("spass.mapping.rootpath")
     val mappingDir = maybeRootPath.map(File(_)).getOrElse(cwd / "mapping")
     val restGetDir = mappingDir / "rest" / "get"
 
-    // Assume a URI is TYPE/ID.
+    // Assume a URI is /type[/type/..]/ID.
     val splitted = path.split("/")
-    val file = restGetDir / splitted(0) / (splitted(1) + ".xml")
-
     val resFileDir = splitted.dropRight(1).foldLeft(restGetDir)((z, n) => z / n)
-
+    val file = resFileDir / (splitted.last + ext)
 
 
     if(file.exists) {

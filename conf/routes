@@ -30,9 +30,9 @@ PUT        /rest/json/*path              controllers.RestMockController.putJSON(
 DELETE     /rest/json/*path              controllers.RestMockController.deleteJSON(path)
 
 # Classic GET with query strings plus SOAP
-GET        /classic/*path                controllers.ClassicUriController.classicGet(path)
+GET        /classic/*path                controllers.ClassicUriController.classicGetWithStructure(path)
 POST       /classic                      controllers.SoapMockController.mapXml
-
+GET        /classic                      controllers.ClassicUriController.classicGet
 
 GET        /*path                        controllers.GeneralController.index(path)
 
