@@ -10,7 +10,9 @@ GET        /assets/*file                 controllers.Assets.at(path="/public", f
 
 
 # SOAP
-POST       /soap                         controllers.SoapMockController.mapXml
+POST       /soap                         controllers.SoapMockController.mapXML(path ?= "")
+POST       /soap/                        controllers.SoapMockController.mapXML(path ?= "")
+POST       /soap/*path                   controllers.SoapMockController.mapXML(path)
 POST       /soap/test                    controllers.SoapMockController.talkOnXml
 
 
@@ -34,9 +36,12 @@ DELETE     /rest/*path                   controllers.RestMockController.doHttpMe
 
 
 # Classic GET with query strings plus SOAP
-GET        /classic/*path                controllers.ClassicUriController.classicGetWithStructure(path)
-POST       /classic                      controllers.SoapMockController.mapXml
 GET        /classic                      controllers.ClassicUriController.classicGet
+POST       /classic                      controllers.SoapMockController.mapXML(path ?= "")
+GET        /classic/                     controllers.ClassicUriController.classicGet
+POST       /classic/                     controllers.SoapMockController.mapXML(path ?= "")
+GET        /classic/*path                controllers.ClassicUriController.classicGetWithStructure(path)
+POST       /classic/*path                controllers.SoapMockController.mapXML(path)
 
 
 GET        /*path                        controllers.GeneralController.index(path)
