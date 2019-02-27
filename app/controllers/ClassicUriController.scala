@@ -1,6 +1,7 @@
 package controllers
 
 import java.nio.charset.Charset
+import java.nio.file.NoSuchFileException
 
 import better.files.Dsl._
 import better.files._
@@ -41,53 +42,63 @@ class ClassicUriController(greetingService: GreetingService,
     val splitted = path.split("/")
     val classicGetFileDir = splitted.foldLeft(classicGetDir)((z, n) => z / n)
 
-    val allReqs = (classicGetFileDir / "requests").list(_.extension == Some(".conf")).toSeq
-    import collection.JavaConverters._
-    val matchedReqs = allReqs.filter(file => {
-      val conf = ConfigFactory.parseFile(file.toJava)
-      logger.debug(inspect(conf))
-      val entries = conf.entrySet.asScala
-      // partial matching
-      val matchedEvals = entries.map(entry => {
-        queryStrings.get(entry.getKey) match {
-          case Some(queryVals) => {
-            if (queryVals.size > 1) {
-              logger.warn("A duplicated key of a query string found. key: " + entry.getKey)
+    try {
+
+      val allReqs = (classicGetFileDir / "requests").list(_.extension == Some(".conf")).toSeq
+      import collection.JavaConverters._
+      val matchedReqs = allReqs.filter(file => {
+        val conf = ConfigFactory.parseFile(file.toJava)
+        logger.debug(inspect(conf))
+        val entries = conf.entrySet.asScala
+        // partial matching
+        val matchedEvals = entries.map(entry => {
+          queryStrings.get(entry.getKey) match {
+            case Some(queryVals) => {
+              if (queryVals.size > 1) {
+                logger.warn("A duplicated key of a query string found. key: " + entry.getKey)
+              }
+              val expectedVal = entry.getValue.unwrapped.toString
+              val evaled = queryVals.map(queryVal => {
+                logger.debug(inspect(queryVal))
+                logger.debug(inspect(expectedVal))
+                queryVal == expectedVal
+              })
+              logger.debug(inspect(evaled))
+              val notMatched = evaled.filter(_ == false)
+              notMatched.isEmpty
             }
-            val expectedVal = entry.getValue.unwrapped.toString
-            val evaled = queryVals.map(queryVal => {
-              logger.debug(inspect(queryVal))
-              logger.debug(inspect(expectedVal))
-              queryVal == expectedVal
-            })
-            logger.debug(inspect(evaled))
-            val notMatched = evaled.filter(_ == false)
-            notMatched.isEmpty
+            case None => false
           }
-          case None => false
-        }
+        })
+
+        val notMatched = matchedEvals.filter(_ == false)
+        // specified params are all matched.
+        notMatched.isEmpty
       })
+      logger.info(inspect(matchedReqs.size))
 
-      val notMatched = matchedEvals.filter(_ == false)
-      // specified params are all matched.
-      notMatched.isEmpty
-    })
-    logger.info(inspect(matchedReqs.size))
+      val requestedFilename = matchedReqs.headOption match {
+        case Some(file) => file.name.dropRight(4) + "xml"
+        case None => "default." + ext
+      }
 
-    val requestedFilename = matchedReqs.headOption match {
-      case Some(file) => file.name.dropRight(4) + "xml"
-      case None => "default." + ext
+      val allReses = (classicGetFileDir / "responses").list(_.extension == Some("." + ext)).toSeq
+      val matchedReses = allReses.filter(_.name == requestedFilename)
+      logger.info(inspect(matchedReses.size))
+      // Should find one file
+      val resXmlFile = matchedReses.head
+      val content = resXmlFile.contentAsString
+      logger.info(wrapForLogging("Response to put back", content))
+
+      Ok(Xml(content))
+
+    } catch {
+      case nsfe: NoSuchFileException =>  {
+        logger.error("Not Found: Your requested URI can't find a necessary file to respond.", nsfe)
+        NotFound("Not Found: Your requested URI can't find a necessary file to respond. URI: " + request.uri)
+      }
+      case e: Exception => throw e
     }
-
-    val allReses = (classicGetFileDir / "responses").list(_.extension == Some("." + ext)).toSeq
-    val matchedReses = allReses.filter(_.name == requestedFilename)
-    logger.info(inspect(matchedReses.size))
-    // Should find one file
-    val resXmlFile = matchedReses.head
-    val content = resXmlFile.contentAsString
-    logger.info(wrapForLogging("Response to put back", content))
-
-    Ok(Xml(content))
 
   }
 

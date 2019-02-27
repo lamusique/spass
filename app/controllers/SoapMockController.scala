@@ -9,9 +9,9 @@ import services.GreetingService
 import better.files._
 import java.io.{File => JFile}
 import java.nio.charset.Charset
+import java.nio.file.NoSuchFileException
 
 import better.files.Dsl._
-
 import utils.CodeUtility._
 
 class SoapMockController(greetingService: GreetingService,
@@ -42,7 +42,7 @@ class SoapMockController(greetingService: GreetingService,
     }
   }
 
-  def mapXml = Action { request =>
+  def mapXML(path: String) = Action { request =>
     request.body.asXml.map { xml =>
 
       logger.info(wrapForLogging("Requested XML", xml.toString))
@@ -54,7 +54,14 @@ class SoapMockController(greetingService: GreetingService,
       val mappingDir = maybeRootPath.map(File(_)).getOrElse(cwd / "mapping")
       val soapDir = mappingDir / "soap"
 
-      val allXMLReqs = (soapDir / "requests").list(_.extension == Some(".xml")).toSeq
+
+      // Assume a URI is not /type[/type/..]/ID but /type[/type/..]
+      val splitted = path.split("/")
+      val soapStructuredDir = splitted.foldLeft(soapDir)((z, n) => z / n)
+
+      try {
+
+      val allXMLReqs = (soapStructuredDir / "requests").list(_.extension == Some(".xml")).toSeq
       val matchedXMLReqs = allXMLReqs.filter(file => {
         val expectedXmlContent = file.contentAsString
         val trimmedExpectedXml = trimXml(expectedXmlContent)
@@ -69,7 +76,7 @@ class SoapMockController(greetingService: GreetingService,
       val matchedReqs = if (matchedXMLReqs.isEmpty) {
         // try to find by RegEx
         logger.debug("Exact matching failed and then try to find an expectation by RegEx.")
-        val allRegexReqs = (soapDir / "requests").list(_.extension == Some(".regex")).toSeq
+        val allRegexReqs = (soapStructuredDir / "requests").list(_.extension == Some(".regex")).toSeq
         val matchedReqs = allRegexReqs.filter(file => {
         val expectedRegexContent = file.contentAsString
 
@@ -88,7 +95,7 @@ class SoapMockController(greetingService: GreetingService,
         case None => "default.xml"
       }
 
-      val allReses = (soapDir / "responses").list(_.extension == Some(".xml")).toSeq
+      val allReses = (soapStructuredDir / "responses").list(_.extension == Some(".xml")).toSeq
       val matchedReses = allReses.filter(_.name == requestedFilename)
       logger.debug(inspect(matchedReses.size))
       // Should find one file
@@ -96,6 +103,15 @@ class SoapMockController(greetingService: GreetingService,
       val content = resXmlFile.contentAsString
       logger.info(wrapForLogging("Response to put back", content))
       Ok(Xml(content))
+
+      } catch {
+        case nsfe: NoSuchFileException =>  {
+          logger.error("Not Found: Your requested URI can't find a necessary file to respond.", nsfe)
+          NotFound("Not Found: Your requested URI can't find a necessary file to respond. URI: " + request.uri)
+        }
+        case e: Exception => throw e
+      }
+
 
     }.getOrElse {
       BadRequest("Expecting Xml data")
