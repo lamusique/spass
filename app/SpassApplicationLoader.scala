@@ -11,6 +11,10 @@ import router.Routes
 
 import scala.concurrent.ExecutionContext
 
+import better.files._
+import java.io.{File => JFile}
+
+
 /**
  * Application loader that wires up the application dependencies using Macwire
  */
@@ -23,19 +27,10 @@ class SpassApplicationLoader extends ApplicationLoader {
       _.configure(context.environment, context.initialConfiguration, Map.empty)
     }
 
-//    logger.info(Console.RED_B + Console.UNDERLINED + "This is red." + Console.RESET)
     logger.info(
-      """
-        | _______                ______
-        ||     __|.-----..---.-.|   __ \
-        ||__     ||  _  ||  _  ||   __ <
-        ||_______||   __||___._||  ____/
-        |         |__|          |__|
-        |
-        |------------- Spaß ------------
-        ||  a mock web service server  |
-        |-------------------------------
-        |""".stripMargin)
+      Console.YELLOW
+      + Resource.getAsString("logo.txt")
+      + Console.RESET)
 
     new SpassComponents(context).application
   }
