@@ -41,7 +41,7 @@ mock
 
 ## Preparation
 1. Install sbt
-    - via official site [https://www.scala-sbt.org/download.html](https://www.scala-sbt.org/download.html), (Scoop)[https://scoop.sh/] for Windows or (Home Brew)[https://brew.sh/] for macOS.
+    - via official site [sbt download](https://www.scala-sbt.org/download.html), [Scoop](https://scoop.sh/) for Windows or [Home Brew](https://brew.sh/) for macOS.
 1. To build this app you need the Internet in order to download libraries.
 1. Clone this repo.
 
