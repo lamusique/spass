@@ -27,7 +27,7 @@ class RestMockController(greetingService: GreetingService,
 
     logger.debug(inspect(path))
     logger.debug(inspect(extensionToUse))
-    logger.info(wrapForLogging("Request URI", request.method + " " + request.uri))
+    logger.info(wrapForLogging("Requested URI", request.method + " " + request.uri))
 
     matchAndReturn(path, contentTypeToUse, request)
   }
@@ -48,6 +48,7 @@ class RestMockController(greetingService: GreetingService,
     contentTypeToUse match {
       case ContentType.XML => {
         if (file.exists) {
+          logger.debug("A matched response file: " + file)
           val content = file.contentAsString
           logger.info(wrapForLogging("Response to put back", content))
           // TODO: POST to create an entity should have not Ok but Created.
@@ -60,6 +61,7 @@ class RestMockController(greetingService: GreetingService,
       }
       case ContentType.JSON => {
         if (file.exists) {
+          logger.debug("A matched response file: " + file)
           val content = file.contentAsString
           logger.info(wrapForLogging("Response to put back", content))
           Ok(Json.parse(content))

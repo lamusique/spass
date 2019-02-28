@@ -38,8 +38,14 @@ trait WebServiceController {
 
   }
 
-  def trimXml(xmlContent: String) = xmlContent
-    .replaceAll(">\\s*<", "><").trim
+//  def trimXml(xmlContent: String) = xmlContent
+//    .replaceAll(">\\s*<", "><").trim
+
+  def trimXML(xmlContent: String) = {
+    val xml = scala.xml.XML.loadString(xmlContent)
+    val trimmed = scala.xml.Utility.trim(xml)
+    trimmed.toString
+  }
 
   def wrapForLogging(title: String, content: String): String = {
 

@@ -10,6 +10,7 @@ import better.files._
 import java.io.{File => JFile}
 import java.nio.charset.Charset
 import java.nio.file.NoSuchFileException
+import java.util.regex.Pattern
 
 import better.files.Dsl._
 import utils.CodeUtility._
@@ -21,6 +22,7 @@ class SoapMockController(greetingService: GreetingService,
 
   private val logger = Logger(getClass)
 
+  val soapPattern = Pattern.compile(".*<soap:Envelope.*", Pattern.DOTALL)
 
   def talkOnXml = Action { request =>
     request.body.asXml.map { xml =>
@@ -29,7 +31,7 @@ class SoapMockController(greetingService: GreetingService,
         + "=" * 16 + Console.CYAN
         + xml.toString
         + "=" * 16 + Console.RESET)
-      val trimmedReqXml = trimXml(xml.toString)
+      val trimmedReqXml = trimXML(xml.toString)
       logger.info("trimmed requested XML=" + trimmedReqXml)
 
       (xml \\ "name" headOption).map(_.text).map { name =>
@@ -45,9 +47,10 @@ class SoapMockController(greetingService: GreetingService,
   def mapXML(path: String) = Action { request =>
     request.body.asXml.map { xml =>
 
+      logger.info(wrapForLogging("Requested URI", request.method + " " + request.uri))
       logger.info(wrapForLogging("Requested XML", xml.toString))
 
-      val trimmedReqXml = trimXml(xml.toString)
+      val trimmedReqXml = trimXML(xml.toString)
       logger.info("trimmed requested XML=" + trimmedReqXml)
 
       val maybeRootPath = config.getOptional[String]("spass.mapping.rootpath")
@@ -64,7 +67,7 @@ class SoapMockController(greetingService: GreetingService,
       val allXMLReqs = (soapStructuredDir / "requests").list(_.extension == Some(".xml")).toSeq
       val matchedXMLReqs = allXMLReqs.filter(file => {
         val expectedXmlContent = file.contentAsString
-        val trimmedExpectedXml = trimXml(expectedXmlContent)
+        val trimmedExpectedXml = trimXML(expectedXmlContent)
 
         logger.debug(inspect(trimmedReqXml))
         logger.debug(inspect(trimmedExpectedXml))
@@ -82,6 +85,8 @@ class SoapMockController(greetingService: GreetingService,
 
         logger.debug(inspect(expectedRegexContent))
         logger.debug(inspect(trimmedReqXml))
+
+        // Unnecessary to regex with DOTALL due to trimmed all whitespaces and line breaks.
         val matches = trimmedReqXml.matches(expectedRegexContent)
         logger.debug(inspect(matches))
         matches
@@ -91,7 +96,9 @@ class SoapMockController(greetingService: GreetingService,
       } else matchedXMLReqs
 
       val requestedFilename = matchedReqs.headOption match {
-        case Some(file) => file.name.dropRight(file.extension.get.size - 1) + "xml"
+        case Some(matchedReqFile) =>
+          logger.debug(inspect(matchedReqFile))
+          matchedReqFile.name.dropRight(matchedReqFile.extension.get.size - 1) + "xml"
         case None => "default.xml"
       }
 
@@ -100,9 +107,17 @@ class SoapMockController(greetingService: GreetingService,
       logger.debug(inspect(matchedReses.size))
       // Should find one file
       val resXmlFile = matchedReses.head
+      logger.debug(inspect(resXmlFile))
       val content = resXmlFile.contentAsString
       logger.info(wrapForLogging("Response to put back", content))
-      Ok(Xml(content))
+
+      if (soapPattern.matcher(content).matches) {
+        // Content-Type of SOAP response is only text/xml or application/soap+xml.
+        Ok(Xml(content)).as("application/soap+xml")
+      } else {
+        // Not SOAP response but application/xml.
+        Ok(Xml(content))
+      }
 
       } catch {
         case nsfe: NoSuchFileException =>  {
