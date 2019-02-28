@@ -78,7 +78,9 @@ class ClassicUriController(greetingService: GreetingService,
       logger.info(inspect(matchedReqs.size))
 
       val requestedFilename = matchedReqs.headOption match {
-        case Some(file) => file.name.dropRight(4) + "xml"
+        case Some(file) =>
+          logger.debug("A matched request conf file: " + file)
+          file.name.dropRight(4) + "xml"
         case None => "default." + ext
       }
 
@@ -87,6 +89,7 @@ class ClassicUriController(greetingService: GreetingService,
       logger.info(inspect(matchedReses.size))
       // Should find one file
       val resXmlFile = matchedReses.head
+      logger.debug("A matched response file: " + resXmlFile)
       val content = resXmlFile.contentAsString
       logger.info(wrapForLogging("Response to put back", content))
 

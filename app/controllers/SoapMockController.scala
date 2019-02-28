@@ -92,7 +92,9 @@ class SoapMockController(greetingService: GreetingService,
       } else matchedXMLReqs
 
       val requestedFilename = matchedReqs.headOption match {
-        case Some(file) => file.name.dropRight(file.extension.get.size - 1) + "xml"
+        case Some(matchedReqFile) =>
+          logger.debug(inspect(matchedReqFile))
+          matchedReqFile.name.dropRight(matchedReqFile.extension.get.size - 1) + "xml"
         case None => "default.xml"
       }
 
@@ -101,6 +103,7 @@ class SoapMockController(greetingService: GreetingService,
       logger.debug(inspect(matchedReses.size))
       // Should find one file
       val resXmlFile = matchedReses.head
+      logger.debug(inspect(resXmlFile))
       val content = resXmlFile.contentAsString
       logger.info(wrapForLogging("Response to put back", content))
       Ok(Xml(content))
