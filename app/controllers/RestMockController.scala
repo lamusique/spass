@@ -27,7 +27,7 @@ class RestMockController(greetingService: GreetingService,
 
     logger.debug(inspect(path))
     logger.debug(inspect(extensionToUse))
-    logger.info(wrapForLogging("Request URI", request.method + " " + request.uri))
+    logger.info(wrapForLogging("Requested URI", request.method + " " + request.uri))
 
     matchAndReturn(path, contentTypeToUse, request)
   }
