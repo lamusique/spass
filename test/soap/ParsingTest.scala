@@ -24,10 +24,10 @@ object ParsingTest extends App {
   val responseSoapXML = """<?xml version="1.0"?>
                         |
                         |<soap:Envelope
-                        |xmlns:soap="http://www.w3.org/2003/05/soap-envelope/"
-                        |soap:encodingStyle="http://www.w3.org/2003/05/soap-encoding">
+                        |    xmlns:soap="http://www.w3.org/2003/05/soap-envelope/"
+                        |  soap:encodingStyle="http://www.w3.org/2003/05/soap-encoding">
                         |
-                        |<soap:Body xmlns:m="http://www.example.org/stock">
+                        |<soap:Body xmlns:m="http://www.example.org/stock"  >
                         |  <m:GetStockPriceResponse>
                         |    <m:Price>34.5</m:Price>
                         |  </m:GetStockPriceResponse>
@@ -51,8 +51,9 @@ object ParsingTest extends App {
 
     println(inspect(soapPattern.matcher(content).matches()))
 
-
     val xml = scala.xml.XML.loadString(content)
+    val trimmed = scala.xml.Utility.trim(xml)
+    println(inspect(trimmed))
     val env = xml \\ "soap:Envelope"
     println(inspect(env.length))
     val envb = xml \\ "Envelope"
