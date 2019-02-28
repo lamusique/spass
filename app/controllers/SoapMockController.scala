@@ -29,7 +29,7 @@ class SoapMockController(greetingService: GreetingService,
         + "=" * 16 + Console.CYAN
         + xml.toString
         + "=" * 16 + Console.RESET)
-      val trimmedReqXml = trimXml(xml.toString)
+      val trimmedReqXml = trimXML(xml.toString)
       logger.info("trimmed requested XML=" + trimmedReqXml)
 
       (xml \\ "name" headOption).map(_.text).map { name =>
@@ -48,7 +48,7 @@ class SoapMockController(greetingService: GreetingService,
       logger.info(wrapForLogging("Requested URI", request.method + " " + request.uri))
       logger.info(wrapForLogging("Requested XML", xml.toString))
 
-      val trimmedReqXml = trimXml(xml.toString)
+      val trimmedReqXml = trimXML(xml.toString)
       logger.info("trimmed requested XML=" + trimmedReqXml)
 
       val maybeRootPath = config.getOptional[String]("spass.mapping.rootpath")
@@ -65,7 +65,7 @@ class SoapMockController(greetingService: GreetingService,
       val allXMLReqs = (soapStructuredDir / "requests").list(_.extension == Some(".xml")).toSeq
       val matchedXMLReqs = allXMLReqs.filter(file => {
         val expectedXmlContent = file.contentAsString
-        val trimmedExpectedXml = trimXml(expectedXmlContent)
+        val trimmedExpectedXml = trimXML(expectedXmlContent)
 
         logger.debug(inspect(trimmedReqXml))
         logger.debug(inspect(trimmedExpectedXml))
