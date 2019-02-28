@@ -10,6 +10,7 @@ import better.files._
 import java.io.{File => JFile}
 import java.nio.charset.Charset
 import java.nio.file.NoSuchFileException
+import java.util.regex.Pattern
 
 import better.files.Dsl._
 import utils.CodeUtility._
@@ -21,6 +22,7 @@ class SoapMockController(greetingService: GreetingService,
 
   private val logger = Logger(getClass)
 
+  val soapPattern = Pattern.compile(".*<soap:Envelope.*", Pattern.DOTALL)
 
   def talkOnXml = Action { request =>
     request.body.asXml.map { xml =>
@@ -83,6 +85,8 @@ class SoapMockController(greetingService: GreetingService,
 
         logger.debug(inspect(expectedRegexContent))
         logger.debug(inspect(trimmedReqXml))
+
+        // Unnecessary to regex with DOTALL due to trimmed all whitespaces and line breaks.
         val matches = trimmedReqXml.matches(expectedRegexContent)
         logger.debug(inspect(matches))
         matches
@@ -106,7 +110,14 @@ class SoapMockController(greetingService: GreetingService,
       logger.debug(inspect(resXmlFile))
       val content = resXmlFile.contentAsString
       logger.info(wrapForLogging("Response to put back", content))
-      Ok(Xml(content))
+
+      if (soapPattern.matcher(content).matches) {
+        // Content-Type of SOAP response is only text/xml or application/soap+xml.
+        Ok(Xml(content)).as("application/soap+xml")
+      } else {
+        // Not SOAP response but application/xml.
+        Ok(Xml(content))
+      }
 
       } catch {
         case nsfe: NoSuchFileException =>  {
