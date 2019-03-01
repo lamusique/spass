@@ -22,7 +22,8 @@ class SoapMockController(greetingService: GreetingService,
 
   private val logger = Logger(getClass)
 
-  val soapPattern = Pattern.compile(".*<soap:Envelope.*", Pattern.DOTALL)
+  // <soapenv:Envelope etc. is possible
+  val soapPattern = Pattern.compile(".*<.*soap.*Envelope.*", Pattern.DOTALL)
 
   def talkOnXml = Action { request =>
     request.body.asXml.map { xml =>
@@ -112,10 +113,12 @@ class SoapMockController(greetingService: GreetingService,
       logger.info(wrapForLogging("Response to put back", content))
 
       if (soapPattern.matcher(content).matches) {
-        // Content-Type of SOAP response is only text/xml or application/soap+xml.
-        Ok(Xml(content)).as("application/soap+xml")
+        // Content-Type of SOAP response of Spring only allows text/xml, not application/soap+xml.
+        logger.debug("SOAP")
+        Ok(Xml(content)).as("text/xml")
       } else {
         // Not SOAP response but application/xml.
+        logger.debug("Not SOAP")
         Ok(Xml(content))
       }
 
