@@ -25,25 +25,6 @@ class SoapMockController(greetingService: GreetingService,
   // <soapenv:Envelope etc. is possible
   val soapPattern = Pattern.compile(".*<.*soap.*Envelope.*", Pattern.DOTALL)
 
-  def talkOnXml = Action { request =>
-    request.body.asXml.map { xml =>
-
-      logger.info("requested XML:\n"
-        + "=" * 16 + Console.CYAN
-        + xml.toString
-        + "=" * 16 + Console.RESET)
-      val trimmedReqXml = trimXML(xml.toString)
-      logger.info("trimmed requested XML=" + trimmedReqXml)
-
-      (xml \\ "name" headOption).map(_.text).map { name =>
-        Ok(Xml("<xml><title>Welcome</title><content>You requested XML file and its name is " + name + "</content></xml>"))
-      }.getOrElse {
-        BadRequest("Missing parameter [name]")
-      }
-    }.getOrElse {
-      BadRequest("Expecting Xml data")
-    }
-  }
 
   def mapXML(path: String) = Action { request =>
     request.body.asXml.map { xml =>

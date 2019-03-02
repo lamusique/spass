@@ -13,7 +13,6 @@ GET        /assets/*file                 controllers.Assets.at(path="/public", f
 POST       /soap                         controllers.SoapMockController.mapXML(path ?= "")
 POST       /soap/                        controllers.SoapMockController.mapXML(path ?= "")
 POST       /soap/*path                   controllers.SoapMockController.mapXML(path)
-POST       /soap/test                    controllers.SoapMockController.talkOnXml
 
 
 # REST specifying XML
