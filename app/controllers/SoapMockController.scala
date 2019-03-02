@@ -113,12 +113,12 @@ class SoapMockController(greetingService: GreetingService,
       logger.info(wrapForLogging("Response to put back", content))
 
       if (soapPattern.matcher(content).matches) {
-        // Content-Type of SOAP response of Spring only allows text/xml, not application/soap+xml.
-        logger.debug("SOAP")
+        // Content-Type of SOAP response of Spring WS only allows text/xml, not application/soap+xml.
+        logger.debug("SOAP response recognised.")
         Ok(Xml(content)).as("text/xml")
       } else {
-        // Not SOAP response but application/xml.
-        logger.debug("Not SOAP")
+        // Not SOAP response is to be with application/xml.
+        logger.debug("Not SOAP response recognised.")
         Ok(Xml(content))
       }
 
@@ -132,7 +132,7 @@ class SoapMockController(greetingService: GreetingService,
 
 
     }.getOrElse {
-      BadRequest("Expecting Xml data")
+      BadRequest("Expecting XML data")
     }
   }
 
