@@ -22,8 +22,10 @@ class SoapMockController(greetingService: GreetingService,
 
   private val logger = Logger(getClass)
 
-  // <soapenv:Envelope etc. is possible
-  val soapPattern = Pattern.compile(".*<.*soap.*Envelope.*", Pattern.DOTALL)
+  // SOAP XML has e.g.
+  // <someprefix:Envelope xmlns:someprefix="http://www.w3.org/2003/05/soap-envelope" xmlns:anothertag="http://www.example.org">
+  // cf. https://www.w3.org/TR/soap/
+  val soapPattern = Pattern.compile(raw".*<[^>]*Envelope[^>]*xmlns[^=]*=[^>]*>.*", Pattern.DOTALL)
 
 
   def mapXML(path: String) = Action { request =>
