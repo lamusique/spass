@@ -22,32 +22,14 @@ class SoapMockController(greetingService: GreetingService,
 
   private val logger = Logger(getClass)
 
-  val soapPattern = Pattern.compile(".*<soap:Envelope.*", Pattern.DOTALL)
+  // <soapenv:Envelope etc. is possible
+  val soapPattern = Pattern.compile(".*<.*soap.*Envelope.*", Pattern.DOTALL)
 
-  def talkOnXml = Action { request =>
-    request.body.asXml.map { xml =>
-
-      logger.info("requested XML:\n"
-        + "=" * 16 + Console.CYAN
-        + xml.toString
-        + "=" * 16 + Console.RESET)
-      val trimmedReqXml = trimXML(xml.toString)
-      logger.info("trimmed requested XML=" + trimmedReqXml)
-
-      (xml \\ "name" headOption).map(_.text).map { name =>
-        Ok(Xml("<xml><title>Welcome</title><content>You requested XML file and its name is " + name + "</content></xml>"))
-      }.getOrElse {
-        BadRequest("Missing parameter [name]")
-      }
-    }.getOrElse {
-      BadRequest("Expecting Xml data")
-    }
-  }
 
   def mapXML(path: String) = Action { request =>
     request.body.asXml.map { xml =>
 
-      logger.info(wrapForLogging("Requested URI", request.method + " " + request.uri))
+      logger.info(traceRequest("Received Request", request))
       logger.info(wrapForLogging("Requested XML", xml.toString))
 
       val trimmedReqXml = trimXML(xml.toString)
@@ -112,10 +94,12 @@ class SoapMockController(greetingService: GreetingService,
       logger.info(wrapForLogging("Response to put back", content))
 
       if (soapPattern.matcher(content).matches) {
-        // Content-Type of SOAP response is only text/xml or application/soap+xml.
-        Ok(Xml(content)).as("application/soap+xml")
+        // Content-Type of SOAP response of Spring WS only allows text/xml, not application/soap+xml.
+        logger.debug("SOAP response recognised.")
+        Ok(Xml(content)).as("text/xml")
       } else {
-        // Not SOAP response but application/xml.
+        // Not SOAP response is to be with application/xml.
+        logger.debug("Not SOAP response recognised.")
         Ok(Xml(content))
       }
 
@@ -129,7 +113,7 @@ class SoapMockController(greetingService: GreetingService,
 
 
     }.getOrElse {
-      BadRequest("Expecting Xml data")
+      BadRequest("Expecting XML data")
     }
   }
 
