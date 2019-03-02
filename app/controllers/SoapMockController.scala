@@ -29,7 +29,7 @@ class SoapMockController(greetingService: GreetingService,
   def mapXML(path: String) = Action { request =>
     request.body.asXml.map { xml =>
 
-      logger.info(wrapForLogging("Requested URI", request.method + " " + request.uri))
+      logger.info(traceRequest("Received Request", request))
       logger.info(wrapForLogging("Requested XML", xml.toString))
 
       val trimmedReqXml = trimXML(xml.toString)

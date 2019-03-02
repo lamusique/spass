@@ -2,6 +2,8 @@ package controllers
 
 import java.nio.charset.Charset
 
+import play.api.mvc.{AnyContent, Request}
+
 trait WebServiceController {
   implicit val encoding = Charset.forName("UTF-8")
 
@@ -57,4 +59,19 @@ trait WebServiceController {
     + "=" * header.size
     + Console.RESET)
   }
+
+  def traceRequest(title: String, request: Request[AnyContent]) = {
+    wrapForLogging("Received Request", {
+
+      val uri = "URI :" + request.method + " " + request.uri
+
+      (
+        uri + "\n"
+          + "-" * uri.size + "\n"
+          + request.headers.toSimpleMap.map(e => e._1 + ": " + e._2).mkString("\n")
+        )
+
+    })
+  }
+
 }
