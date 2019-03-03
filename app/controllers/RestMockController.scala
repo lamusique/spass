@@ -119,22 +119,31 @@ class RestMockController(greetingService: GreetingService,
   }
 
 
-  def getXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
-
-  def postXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
-
-  def putXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
-
-  def deleteXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
-
-
+  // Read/SELECT
   def getJSON(path: String) = doHttpMethods(path, ContentType.JSON.ext)
 
+  // Create/INSERT, not idempotent
   def postJSON(path: String) = doHttpMethods(path, ContentType.JSON.ext)
 
+  // INSERT UPDATE or REPLACE, idempotent
+  // PUT /collection/id
   def putJSON(path: String) = doHttpMethods(path, ContentType.JSON.ext)
 
+  // UPDATE
+  // PATCH /collection/id
+  def patchJSON(path: String) = doHttpMethods(path, ContentType.XML.ext)
+
+  // DELETE
+  // DELETE /collection
+  // DELETE /collection/id
   def deleteJSON(path: String) = doHttpMethods(path, ContentType.JSON.ext)
+
+
+  def getXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
+  def postXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
+  def putXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
+  def patchXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
+  def deleteXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
 
 
 }
