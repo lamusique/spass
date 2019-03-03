@@ -43,6 +43,11 @@ class RestMockController(greetingService: GreetingService,
     // Assume a URI is /type[/type/..]/ID.
     val splitted = path.split("/")
     val resFileDir = splitted.dropRight(1).foldLeft(restGetDir)((z, n) => z / n)
+
+    // This is for GET
+    val allReqs = (resFileDir / "requests").list(_.extension == Some(".conf")).toSeq
+
+    
     val file = resFileDir / (splitted.last + "." + contentTypeToUse.ext)
 
     contentTypeToUse match {
@@ -56,6 +61,9 @@ class RestMockController(greetingService: GreetingService,
         } else {
           val uri = request.uri
           logger.error("Your request doesn't match XML or JSON. URI: " + uri)
+          // TODO: If not found, don't put back default but 404 with a message or 204 No Content
+
+          // This positive putting 20 back makes check loose but better for mock use, where it doesn't know all URIs.
           Ok(Xml(s"""<xml><message><title>Doesn't mach</title><content>Your request doesn't match any files. URI=$uri</content></message></xml>"""))
         }
       }
@@ -68,11 +76,16 @@ class RestMockController(greetingService: GreetingService,
         } else {
           val uri = request.uri
           logger.error("Your request doesn't match XML or JSON. URI: " + uri)
+          // TODO: If not found, don't put back default but 404 or 204 No Content
+
+          // This positive putting 20 back makes check loose but better for mock use, where it doesn't know all URIs.
           Ok(Json.parse(s"""{"json": {"message": {"title": "Doesn't mach", "content": "Your GET request doesn't match any files. URI=$uri"}}}"""))
         }
       }
       case _ => {
         logger.error("Your request doesn't match XML or JSON. contentTypeToUse: " + contentTypeToUse)
+        // TODO: should be an error?
+        // This positive putting 20 back makes check loose but better for mock use, where it doesn't know all URIs.
         Ok("Your request doesn't match XML or JSON. contentTypeToUse: " + contentTypeToUse)
       }
     }
@@ -110,7 +123,7 @@ class RestMockController(greetingService: GreetingService,
     } else {
       if (request.accepts(MimeTypes.XML)) {
         Some(ContentType.XML)
-      }else if (request.accepts(MimeTypes.JSON)) {
+      } else if (request.accepts(MimeTypes.JSON)) {
         Some(ContentType.JSON)
       } else{
         Some(ContentType.Unknown)
