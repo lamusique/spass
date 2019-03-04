@@ -112,16 +112,20 @@ class RestConditionalMockController(
       val allReses = (restFileDir / "responses").list(_.extension == Some("." + contentTypeToUse.ext)).toSeq
       val matchedReses = allReses.filter(_.name == requestedFilename)
       logger.debug(inspect(matchedReses.size))
-      // Should find one file
-      val resFile = matchedReses.head
-      logger.debug(inspect(resFile))
-      val content = resFile.contentAsString
-      logger.info(wrapForLogging("Response to put back", content))
+      // Basically a user should put at least one file but non-existence is possible.
+      matchedReses.headOption match {
+        case Some(resFile) => {
+          logger.debug(inspect(resFile))
+          val content = resFile.contentAsString
+          logger.info(wrapForLogging("Response to put back", content))
 
-      contentTypeToUse match {
-        case ContentType.XML => Ok(Xml(content))
-        case ContentType.JSON => Ok(Json.parse(content))
-        case _ => throw new RuntimeException("A content type is out of use. contentTypeToUse: " + contentTypeToUse)
+          contentTypeToUse match {
+            case ContentType.XML => Ok(Xml(content))
+            case ContentType.JSON => Ok(Json.parse(content))
+            case _ => throw new RuntimeException("A content type is out of use. contentTypeToUse: " + contentTypeToUse)
+          }
+        }
+        case None => NotFound("No response file found.")
       }
 
     } catch {
