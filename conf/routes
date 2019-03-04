@@ -15,15 +15,17 @@ POST       /soap/                        controllers.SoapMockController.mapXML(p
 POST       /soap/*path                   controllers.SoapMockController.mapXML(path)
 
 
+# simple matching REST
+
 # REST specifying XML
-GET        /rest/xml/*path               controllers.RestMockController.getXML(path)
+GET        /rest/xml/*path               controllers.ClassicUriController.classicGetWithStructure(path, extensionHint ?= "xml", baseDir ?= "rest")
 POST       /rest/xml/*path               controllers.RestMockController.postXML(path)
 PUT        /rest/xml/*path               controllers.RestMockController.putXML(path)
 PATCH      /rest/xml/*path               controllers.RestMockController.patchXML(path)
 DELETE     /rest/xml/*path               controllers.RestMockController.deleteXML(path)
 
 # REST specifying JSON
-GET        /rest/json/*path              controllers.RestMockController.getJSON(path)
+GET        /rest/json/*path              controllers.ClassicUriController.classicGetWithStructure(path, extensionHint ?= "json", baseDir ?= "rest")
 POST       /rest/json/*path              controllers.RestMockController.postJSON(path)
 PUT        /rest/json/*path              controllers.RestMockController.putJSON(path)
 PATCH      /rest/json/*path              controllers.RestMockController.patchJSON(path)
@@ -31,10 +33,34 @@ DELETE     /rest/json/*path              controllers.RestMockController.deleteJS
 
 # REST
 GET        /rest/*path                   controllers.ClassicUriController.classicGetWithStructure(path, extensionHint ?= null, baseDir ?= "rest")
-POST       /rest/*path                   controllers.RestMockController.doHttpMethods(path, extensionHint ?= null)
-PUT        /rest/*path                   controllers.RestMockController.doHttpMethods(path, extensionHint ?= null)
-PATCH      /rest/*path                   controllers.RestMockController.doHttpMethods(path, extensionHint ?= null)
-DELETE     /rest/*path                   controllers.RestMockController.doHttpMethods(path, extensionHint ?= null)
+POST       /rest/*path                   controllers.RestMockController.doHttpMethodWithBody(path, extensionHint ?= null)
+PUT        /rest/*path                   controllers.RestMockController.doHttpMethodWithBody(path, extensionHint ?= null)
+PATCH      /rest/*path                   controllers.RestMockController.doHttpMethodWithBody(path, extensionHint ?= null)
+DELETE     /rest/*path                   controllers.RestMockController.doHttpMethodWithBody(path, extensionHint ?= null)
+
+
+# conditional REST
+
+# REST specifying XML
+GET        /rest-cond/xml/*path          controllers.ClassicUriController.classicGetWithStructure(path, extensionHint ?= "xml", baseDir ?= "rest-cond")
+POST       /rest-cond/xml/*path          controllers.RestConditionalMockController.postXML(path)
+PUT        /rest-cond/xml/*path          controllers.RestConditionalMockController.putXML(path)
+PATCH      /rest-cond/xml/*path          controllers.RestConditionalMockController.patchXML(path)
+DELETE     /rest-cond/xml/*path          controllers.RestConditionalMockController.deleteXML(path)
+
+# REST specifying JSON
+GET        /rest-cond/json/*path         controllers.ClassicUriController.classicGetWithStructure(path, extensionHint ?= "json", baseDir ?= "rest-cond")
+POST       /rest-cond/json/*path         controllers.RestConditionalMockController.postJSON(path)
+PUT        /rest-cond/json/*path         controllers.RestConditionalMockController.putJSON(path)
+PATCH      /rest-cond/json/*path         controllers.RestConditionalMockController.patchJSON(path)
+DELETE     /rest-cond/json/*path         controllers.RestConditionalMockController.deleteJSON(path)
+
+# REST
+GET        /rest-cond/*path              controllers.ClassicUriController.classicGetWithStructure(path, extensionHint ?= null, baseDir ?= "rest-cond")
+POST       /rest-cond/*path              controllers.RestConditionalMockController.doHttpMethodWithBody(path, extensionHint ?= null)
+PUT        /rest-cond/*path              controllers.RestConditionalMockController.doHttpMethodWithBody(path, extensionHint ?= null)
+PATCH      /rest-cond/*path              controllers.RestConditionalMockController.doHttpMethodWithBody(path, extensionHint ?= null)
+DELETE     /rest-cond/*path              controllers.RestConditionalMockController.doHttpMethodWithBody(path, extensionHint ?= null)
 
 
 # Classic GET with query strings plus SOAP

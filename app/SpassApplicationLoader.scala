@@ -62,7 +62,7 @@ class SpassComponents(context: Context) extends BuiltInComponentsFromContext(con
     val prefix: String = "/"
     //wire[Routes]
     // TODO get rid of the same graph for RestMockController and ClassicUriController
-    new _root_.router.Routes(httpErrorHandler, homeController, greeterController, assets, soapMockController, restMockController, classicUriController, generalController, prefix)
+    new _root_.router.Routes(httpErrorHandler, homeController, greeterController, assets, soapMockController, classicUriController, restMockController, restConditionalMockController, generalController, prefix)
   }
 
   //val errorHandler: play.api.http.HttpErrorHandler

@@ -136,8 +136,7 @@ class RestConditionalMockController(
 
 
   // Read/SELECT
-  // TODO call GET method
-  def getJSON(path: String) = classicGetWithStructure(path, ContentType.JSON.ext, "rest")
+  //def getJSON(path: String) = classicGetWithStructure(path, ContentType.JSON.ext, "rest")
 
   // Create/INSERT, not idempotent
   def postJSON(path: String) = doHttpMethodWithBody(path, ContentType.JSON.ext)
@@ -156,7 +155,6 @@ class RestConditionalMockController(
   def deleteJSON(path: String) = doHttpMethodWithBody(path, ContentType.JSON.ext)
 
 
-  def getXML(path: String) = classicGetWithStructure(path, ContentType.XML.ext, "rest")
   def postXML(path: String) = doHttpMethodWithBody(path, ContentType.XML.ext)
   def putXML(path: String) = doHttpMethodWithBody(path, ContentType.XML.ext)
   def patchXML(path: String) = doHttpMethodWithBody(path, ContentType.XML.ext)
