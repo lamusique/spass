@@ -105,7 +105,7 @@ class RestConditionalMockController(
         case Some(matchedReqFile) =>
           logger.debug(inspect(matchedReqFile))
           matchedReqFile.name.dropRight(matchedReqFile.extension.get.size - 1) + contentTypeToUse.ext
-        case None => "default" + contentTypeToUse.ext
+        case None => "default." + contentTypeToUse.ext
       }
       logger.debug(inspect(requestedFilename))
 
