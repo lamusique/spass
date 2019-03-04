@@ -33,6 +33,7 @@ class RestConditionalMockController(
         case Some(xml) => Option(trimXML(xml.toString))
         case None => None
       }
+      // Expect JSON in Accept and Content-Type.
       case ContentType.JSON => request.body.asJson match {
         case Some(json) => Option(trimJSON(json.toString))
         case None => None
@@ -49,18 +50,16 @@ class RestConditionalMockController(
     val mappingDir = maybeRootPath.map(File(_)).getOrElse(cwd / "mapping")
     val method = request.method.toLowerCase
     logger.info(inspect(method))
-    val restGetDir = mappingDir / "rest" / method
+    val restGetDir = mappingDir / "rest-cond" / method
 
     // Assume a URI is /type[/type/..]/ID.
     val splitted = path.split("/")
     val restFileDir = splitted.foldLeft(restGetDir)((z, n) => z / n)
 
-    val allReqs = (restFileDir / "requests").list(_.extension == Some("." + contentTypeToUse.ext)).toSeq
-
-
     // TODO remove duplication with Soap
-
     try {
+
+      val allReqs = (restFileDir / "requests").list(_.extension == Some("." + contentTypeToUse.ext)).toSeq
 
       val exactlyMatchedReqs = allReqs.filter(file => {
         val expectedContent = file.contentAsString
