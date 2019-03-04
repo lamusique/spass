@@ -2,10 +2,8 @@ package controllers
 
 import java.nio.charset.Charset
 
-import com.fasterxml.jackson.core.JsonParseException
 import play.api.libs.json.JsObject
 import play.api.mvc.{AnyContent, Request}
-//import play.libs.Json
 import play.api.libs.json._
 import play.mvc.Http.MimeTypes
 
@@ -57,15 +55,6 @@ trait WebServiceController {
       val json = Json.parse(jsonContent).as[JsObject]
       json.toString
   }
-//  def trimJSON(jsonContent: String) = {
-//    try {
-//      val json = Json.parse(jsonContent).as[JsObject]
-//      Option(json.toString)
-//    } catch {
-//      case jpe: JsonParseException => None
-//      case e: Exception => throw e;
-//    }
-//  }
 
 
   def wrapForLogging(title: String, content: String): String = {
