@@ -7,6 +7,7 @@ import better.files.Dsl._
 import better.files._
 import com.typesafe.config.ConfigFactory
 import play.api.i18n.Langs
+import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
 import play.api.{Configuration, Logger}
 import play.twirl.api.Xml
@@ -89,18 +90,23 @@ class ClassicUriController(
       val allReses = (classicGetFileDir / "responses").list(_.extension == Some("." + extensionToUse)).toSeq
       val matchedReses = allReses.filter(_.name == requestedFilename)
       logger.info(inspect(matchedReses.size))
-      // Should find one file
-      val resFile = matchedReses.head
-      logger.debug("A matched response file: " + resFile)
 
 
-      val content = resFile.contentAsString
-      logger.info(wrapForLogging("Response to put back", content))
+      // Basically a user should put at least one file but non-existence is possible.
+      matchedReses.headOption match {
+        case Some(resFile) => {
+          logger.debug(inspect(resFile))
+          val content = resFile.contentAsString
+          logger.info(wrapForLogging("Response to put back", content))
 
-
-
-      // TODO make not only XML
-      Ok(Xml(content))
+          contentTypeToUse match {
+            case ContentType.XML => Ok(Xml(content))
+            case ContentType.JSON => Ok(Json.parse(content))
+            case _ => throw new RuntimeException("A content type is out of use. contentTypeToUse: " + contentTypeToUse)
+          }
+        }
+        case None => NotFound("No response file found.")
+      }
 
     } catch {
       case nsfe: NoSuchFileException =>  {
