@@ -104,9 +104,10 @@ class RestConditionalMockController(
       val requestedFilename = matchedReqs.headOption match {
         case Some(matchedReqFile) =>
           logger.debug(inspect(matchedReqFile))
-          matchedReqFile.name.dropRight(matchedReqFile.extension.get.size - 1) + "xml"
-        case None => "default.xml"
+          matchedReqFile.name.dropRight(matchedReqFile.extension.get.size - 1) + contentTypeToUse.ext
+        case None => "default" + contentTypeToUse.ext
       }
+      logger.debug(inspect(requestedFilename))
 
       val allReses = (restFileDir / "responses").list(_.extension == Some("." + contentTypeToUse.ext)).toSeq
       val matchedReses = allReses.filter(_.name == requestedFilename)

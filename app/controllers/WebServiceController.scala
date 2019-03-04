@@ -40,7 +40,7 @@ trait WebServiceController {
     case object JSON extends ContentType {
       override val code: Int = 2
       override val ext: String = "json"
-      override val contentTypeValue: String = "application/xml"
+      override val contentTypeValue: String = "application/json"
     }
 
   }
