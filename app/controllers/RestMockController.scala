@@ -22,10 +22,9 @@ class RestMockController(greetingService: GreetingService,
 
   def doHttpMethodWithBody(path: String, extensionHint: String) = Action {implicit request =>
 
+    logger.debug(inspect(path))
     val contentTypeToUse = contentTypeOnAccept(request, extensionHint)
     val extensionToUse = contentTypeToUse.ext
-
-    logger.debug(inspect(path))
     logger.debug(inspect(extensionToUse))
     logger.info(traceRequest("Received Request", request))
 

@@ -29,12 +29,11 @@ class ClassicUriController(
     logger.debug(inspect(queryStrings))
     // ?aaa=123&bbb=222&aaa=111
     // Map(aaa -> Vector(123, 111), bbb -> Vector(222))
-
-    logger.debug(inspect(request))
-    logger.info(wrapForLogging("Requested URI", request.method + " " + request.uri))
-
     val contentTypeToUse = contentTypeOnAccept(request, extensionHint)
     val extensionToUse = contentTypeToUse.ext
+    logger.debug(inspect(extensionToUse))
+    logger.info(traceRequest("Received Request", request))
+
 
     val maybeRootPath = config.getOptional[String]("spass.mapping.rootpath")
     val mappingDir = maybeRootPath.map(File(_)).getOrElse(cwd / "mapping")
