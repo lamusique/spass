@@ -82,10 +82,14 @@ $ sbt "run 8080"
     - Put here an expected response XML. Several files are allowed.
 
 ### REST
+#### simple mode
 - `./mapping/rest/[type name]/`
     - `001.xml` ←sample
     - Put here an expected request XML. Several files are allowed.
     - For instance requesting `http://localhost:9000/rest/users/001` seeks a response in `./mapping/rest/users/001.xml`
+#### conditional mode
+- `./mapping/rest-cond/[type name]/`
+    - The same way as SOAP with `requests` and `responses`.
 
 ### Config
 `mapping` directory is changeable.
@@ -106,8 +110,12 @@ http://localhost:9000/soap
 1. If they not are matched, it returns `./mapping/soap/responses/default.xml`.
 
 ### REST
+#### simple mode
 http://localhost:9000/rest
 1. When requesting GET /[type name]/id (e.g. http://localhost:9000/rest/users/001) it searches and returns an XML/JSON in the same directory structure as a requested URI.
+#### conditional mode
+http://localhost:9000/rest-cond
+1. The same way as SOAP with `requests` and `responses`.
 
 ### Classic GET
 http://localhost:9000/classic?[key]=[value](&...)
