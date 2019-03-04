@@ -7,14 +7,13 @@ import better.files.Dsl._
 import better.files._
 import com.typesafe.config.ConfigFactory
 import play.api.i18n.Langs
+import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
 import play.api.{Configuration, Logger}
-import play.mvc.Http.MimeTypes
-import play.twirl.api.{Html, Xml}
-import services.GreetingService
+import play.twirl.api.Xml
 import utils.CodeUtility._
 
-class ClassicUriController(greetingService: GreetingService,
+class ClassicUriController(
                          langs: Langs,
                          config: Configuration,
                          cc: ControllerComponents) extends AbstractController(cc) with WebServiceController {
@@ -23,20 +22,22 @@ class ClassicUriController(greetingService: GreetingService,
 
   def classicGet() = classicGetWithStructure("")
 
-  def classicGetWithStructure(path: String, ext: String = "xml") = Action {implicit request =>
+  def classicGetWithStructure(path: String, extensionHint: String = "xml", baseDir: String = "classic") = Action {implicit request =>
 
     logger.debug(inspect(path))
     val queryStrings = request.queryString
     logger.debug(inspect(queryStrings))
     // ?aaa=123&bbb=222&aaa=111
     // Map(aaa -> Vector(123, 111), bbb -> Vector(222))
+    val contentTypeToUse = contentTypeOnAccept(request, extensionHint)
+    val extensionToUse = contentTypeToUse.ext
+    logger.debug(inspect(extensionToUse))
+    logger.info(traceRequest("Received Request", request))
 
-    logger.debug(inspect(request))
-    logger.info(wrapForLogging("Requested URI", request.method + " " + request.uri))
 
     val maybeRootPath = config.getOptional[String]("spass.mapping.rootpath")
     val mappingDir = maybeRootPath.map(File(_)).getOrElse(cwd / "mapping")
-    val classicGetDir = mappingDir / "classic" / "get"
+    val classicGetDir = mappingDir / baseDir / "get"
 
     // Assume a URI is not /type[/type/..]/ID but /type[/type/..]
     val splitted = path.split("/")
@@ -80,20 +81,31 @@ class ClassicUriController(greetingService: GreetingService,
       val requestedFilename = matchedReqs.headOption match {
         case Some(file) =>
           logger.debug("A matched request conf file: " + file)
-          file.name.dropRight(4) + "xml"
-        case None => "default." + ext
+          file.name.dropRight(4) + extensionToUse
+        case None => "default." + extensionToUse
       }
+      logger.debug(inspect(requestedFilename))
 
-      val allReses = (classicGetFileDir / "responses").list(_.extension == Some("." + ext)).toSeq
+      val allReses = (classicGetFileDir / "responses").list(_.extension == Some("." + extensionToUse)).toSeq
       val matchedReses = allReses.filter(_.name == requestedFilename)
       logger.info(inspect(matchedReses.size))
-      // Should find one file
-      val resXmlFile = matchedReses.head
-      logger.debug("A matched response file: " + resXmlFile)
-      val content = resXmlFile.contentAsString
-      logger.info(wrapForLogging("Response to put back", content))
 
-      Ok(Xml(content))
+
+      // Basically a user should put at least one file but non-existence is possible.
+      matchedReses.headOption match {
+        case Some(resFile) => {
+          logger.debug(inspect(resFile))
+          val content = resFile.contentAsString
+          logger.info(wrapForLogging("Response to put back", content))
+
+          contentTypeToUse match {
+            case ContentType.XML => Ok(Xml(content))
+            case ContentType.JSON => Ok(Json.parse(content))
+            case _ => throw new RuntimeException("A content type is out of use. contentTypeToUse: " + contentTypeToUse)
+          }
+        }
+        case None => NotFound("No response file found.")
+      }
 
     } catch {
       case nsfe: NoSuchFileException =>  {
@@ -119,24 +131,5 @@ class ClassicUriController(greetingService: GreetingService,
     val sample = config.get[String]("spass.testing.sample")
     Ok(Xml("<xml><method>delete</method><desc>Your requested path is " + path +" and a config value is " + sample + ".</desc></xml>"))
   }
-
-
-  def contentType(request: Request[AnyContent]) = {
-    request.contentType.map(_.toLowerCase) match {
-      case Some("application/json") | Some("text/json") => "JSON"
-      case Some("application/xml") | Some("text/xml") => "XML"
-      case _ => None
-    }
-  }
-  def acceptType(request: Request[AnyContent]) = {
-    if (request.accepts(MimeTypes.XML)) {
-      // code
-    }else if (request.accepts(MimeTypes.JSON)) {
-      //code
-    } else{
-      //code
-    }
-  }
-
 
 }

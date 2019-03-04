@@ -20,12 +20,11 @@ class RestMockController(greetingService: GreetingService,
 
   private val logger = Logger(getClass)
 
-  def doHttpMethods(path: String, extensionHint: String) = Action {implicit request =>
-
-    val contentTypeToUse = contentType(request, extensionHint)
-    val extensionToUse = contentTypeToUse.ext
+  def doHttpMethodWithBody(path: String, extensionHint: String) = Action {implicit request =>
 
     logger.debug(inspect(path))
+    val contentTypeToUse = contentTypeOnAccept(request, extensionHint)
+    val extensionToUse = contentTypeToUse.ext
     logger.debug(inspect(extensionToUse))
     logger.info(traceRequest("Received Request", request))
 
@@ -79,62 +78,29 @@ class RestMockController(greetingService: GreetingService,
   }
 
 
-  def contentType(request: Request[AnyContent], extensionHint: String) = {
-    // Hint is prior to Accept.
+  // Read/SELECT
+  // def getJSON(path: String) = doHttpMethods(path, ContentType.JSON.ext)
 
-    Option(extensionHint) match {
-      case Some(contentTypeHint) => {
-        ContentType.get(extensionHint).getOrElse(ContentType.XML)
-      }
-      case None => {
-        acceptType(request) match {
-          case Some(ContentType.XML) => ContentType.XML
-          case Some(ContentType.JSON) => ContentType.JSON
-          case _ =>  ContentType.XML
-          }
-      }
-    }
-  }
+  // Create/INSERT, not idempotent
+  def postJSON(path: String) = doHttpMethodWithBody(path, ContentType.JSON.ext)
 
-  def contentType(request: Request[AnyContent]) = {
-      request.contentType.map(_.toLowerCase) match {
-        case Some("application/json") | Some("text/json") => "JSON"
-        case Some("application/xml") | Some("text/xml") => "XML"
-        case _ => None
-      }
-  }
+  // INSERT UPDATE or REPLACE, idempotent
+  // PUT /collection/id
+  def putJSON(path: String) = doHttpMethodWithBody(path, ContentType.JSON.ext)
 
-  def acceptType(request: Request[AnyContent]) = {
-    if (request.acceptedTypes.isEmpty) {
-      None
-    } else {
-      if (request.accepts(MimeTypes.XML)) {
-        Some(ContentType.XML)
-      }else if (request.accepts(MimeTypes.JSON)) {
-        Some(ContentType.JSON)
-      } else{
-        Some(ContentType.Unknown)
-      }
-    }
-  }
+  // UPDATE
+  // PATCH /collection/id
+  def patchJSON(path: String) = doHttpMethodWithBody(path, ContentType.XML.ext)
+
+  // DELETE
+  // DELETE /collection
+  // DELETE /collection/id
+  def deleteJSON(path: String) = doHttpMethodWithBody(path, ContentType.JSON.ext)
 
 
-  def getXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
-
-  def postXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
-
-  def putXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
-
-  def deleteXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
-
-
-  def getJSON(path: String) = doHttpMethods(path, ContentType.JSON.ext)
-
-  def postJSON(path: String) = doHttpMethods(path, ContentType.JSON.ext)
-
-  def putJSON(path: String) = doHttpMethods(path, ContentType.JSON.ext)
-
-  def deleteJSON(path: String) = doHttpMethods(path, ContentType.JSON.ext)
-
+  def postXML(path: String) = doHttpMethodWithBody(path, ContentType.XML.ext)
+  def putXML(path: String) = doHttpMethodWithBody(path, ContentType.XML.ext)
+  def patchXML(path: String) = doHttpMethodWithBody(path, ContentType.XML.ext)
+  def deleteXML(path: String) = doHttpMethodWithBody(path, ContentType.XML.ext)
 
 }

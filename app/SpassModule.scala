@@ -1,5 +1,4 @@
 import controllers._
-import filters.NegativeFilter
 import play.api.Configuration
 import play.api.i18n.Langs
 import play.api.mvc.ControllerComponents
@@ -13,6 +12,7 @@ trait SpassModule extends ServicesModule {
   lazy val generalController = wire[GeneralController]
   lazy val soapMockController = wire[SoapMockController]
   lazy val restMockController = wire[RestMockController]
+  lazy val restConditionalMockController = wire[RestConditionalMockController]
   lazy val homeController = wire[HomeController]
   lazy val classicUriController = wire[ClassicUriController]
 

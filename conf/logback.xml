@@ -8,6 +8,10 @@
     <encoder>
       <pattern>%date [%level] from %logger in %thread - %message%n%xException</pattern>
     </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${application.home:-.}/logs/application-%d{yyyy-MM-dd}.log</fileNamePattern>
+      <maxHistory>20</maxHistory>
+    </rollingPolicy>
   </appender>
 
   <appender name="JSON" class="ch.qos.logback.core.FileAppender">
@@ -19,6 +23,10 @@
         <logstashMarkers/>
       </providers>
     </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${application.home:-.}/logs/application-%d{yyyy-MM-dd}.json</fileNamePattern>
+      <maxHistory>20</maxHistory>
+    </rollingPolicy>
   </appender>
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
