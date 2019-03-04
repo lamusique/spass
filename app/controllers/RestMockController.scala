@@ -1,7 +1,6 @@
 package controllers
 
 import java.nio.charset.Charset
-import java.nio.file.NoSuchFileException
 
 import better.files.Dsl._
 import better.files._
@@ -9,42 +8,31 @@ import play.api.i18n.Langs
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
 import play.api.{Configuration, Logger}
+import play.mvc.Http.MimeTypes
 import play.twirl.api.{Html, Xml}
+import services.GreetingService
 import utils.CodeUtility._
 
-class RestMockController(
+class RestMockController(greetingService: GreetingService,
                          langs: Langs,
                          config: Configuration,
-                         cc: ControllerComponents) extends ClassicUriController(langs, config, cc) with WebServiceController {
+                         cc: ControllerComponents) extends AbstractController(cc) with WebServiceController {
 
   private val logger = Logger(getClass)
 
-  // for POST/PUT/PATCH or even DELETE
-  def doHttpMethodWithBody(path: String, extensionHint: String) = Action {implicit request =>
+  def doHttpMethods(path: String, extensionHint: String) = Action {implicit request =>
 
-    val contentTypeToUse = contentTypeOnAccept(request, extensionHint)
+    val contentTypeToUse = contentType(request, extensionHint)
     val extensionToUse = contentTypeToUse.ext
 
     logger.debug(inspect(path))
     logger.debug(inspect(extensionToUse))
     logger.info(traceRequest("Received Request", request))
 
-    val maybeTrimmedRequestBody = contentTypeToUse match {
-      case ContentType.XML => request.body.asXml match {
-        case Some(xml) => Option(trimXML(xml.toString))
-        case None => None
-      }
-      case ContentType.JSON => request.body.asJson match {
-        case Some(json) => Option(trimJSON(json.toString))
-        case None => None
-      }
-      case _ => throw new RuntimeException("A content type is out of use. contentTypeToUse: " + contentTypeToUse)
-    }
-
-    matchAndReturn(path, contentTypeToUse, maybeTrimmedRequestBody, request)
+    matchAndReturn(path, contentTypeToUse, request)
   }
 
-  def matchAndReturn(path: String, contentTypeToUse: ContentType, maybeTrimmedRequestBody: Option[String], request: Request[AnyContent]) = {
+  def matchAndReturn(path: String, contentTypeToUse: ContentType, request: Request[AnyContent]) = {
 
     val maybeRootPath = config.getOptional[String]("spass.mapping.rootpath")
     val mappingDir = maybeRootPath.map(File(_)).getOrElse(cwd / "mapping")
@@ -54,113 +42,108 @@ class RestMockController(
 
     // Assume a URI is /type[/type/..]/ID.
     val splitted = path.split("/")
-    val restFileDir = splitted.foldLeft(restGetDir)((z, n) => z / n)
+    val resFileDir = splitted.dropRight(1).foldLeft(restGetDir)((z, n) => z / n)
+    val file = resFileDir / (splitted.last + "." + contentTypeToUse.ext)
 
-    val allReqs = (restFileDir / "requests").list(_.extension == Some("." + contentTypeToUse.ext)).toSeq
-
-
-    // TODO remove duplication with Soap
-
-    try {
-
-      val exactlyMatchedReqs = allReqs.filter(file => {
-        val expectedContent = file.contentAsString
-        val trimmedExpected = contentTypeToUse match {
-          case ContentType.XML => trimXML(expectedContent)
-          case ContentType.JSON => trimJSON(expectedContent)
-          case _ => throw new RuntimeException("A content type is out of use. contentTypeToUse: " + contentTypeToUse)
+    contentTypeToUse match {
+      case ContentType.XML => {
+        if (file.exists) {
+          logger.debug("A matched response file: " + file)
+          val content = file.contentAsString
+          logger.info(wrapForLogging("Response to put back", content))
+          // TODO: POST to create an entity should have not Ok but Created.
+          Ok(Xml(content))
+        } else {
+          val uri = request.uri
+          logger.error("Your request doesn't match XML or JSON. URI: " + uri)
+          Ok(Xml(s"""<xml><message><title>Doesn't mach</title><content>Your request doesn't match any files. URI=$uri</content></message></xml>"""))
         }
-        logger.debug(inspect(maybeTrimmedRequestBody))
-        logger.debug(inspect(trimmedExpected))
-
-        maybeTrimmedRequestBody match {
-          case Some(trimmedRequestBody) => trimmedRequestBody == trimmedExpected
-          case None => false
+      }
+      case ContentType.JSON => {
+        if (file.exists) {
+          logger.debug("A matched response file: " + file)
+          val content = file.contentAsString
+          logger.info(wrapForLogging("Response to put back", content))
+          Ok(Json.parse(content))
+        } else {
+          val uri = request.uri
+          logger.error("Your request doesn't match XML or JSON. URI: " + uri)
+          Ok(Json.parse(s"""{"json": {"message": {"title": "Doesn't mach", "content": "Your GET request doesn't match any files. URI=$uri"}}}"""))
         }
-      })
-      logger.debug(inspect(exactlyMatchedReqs.size))
-
-      val matchedReqs = if (exactlyMatchedReqs.isEmpty) {
-        // try to find by RegEx
-        logger.debug("Exact matching failed and then try to find an expectation by RegEx.")
-        val allRegexReqs = (restFileDir / "requests").list(_.extension == Some(".regex")).toSeq
-        val matchedReqs = allRegexReqs.filter(file => {
-          val expectedRegexContent = file.contentAsString
-
-          logger.debug(inspect(expectedRegexContent))
-          logger.debug(inspect(maybeTrimmedRequestBody))
-
-          maybeTrimmedRequestBody match {
-            case Some(trimmedRequestBody) =>
-              // Unnecessary to regex with DOTALL due to trimmed all whitespaces and line breaks.
-              val matches = trimmedRequestBody.matches(expectedRegexContent)
-              logger.debug(inspect(matches))
-              matches
-            case None => false
-          }
-        })
-        matchedReqs
-
-      } else exactlyMatchedReqs
-
-      val requestedFilename = matchedReqs.headOption match {
-        case Some(matchedReqFile) =>
-          logger.debug(inspect(matchedReqFile))
-          matchedReqFile.name.dropRight(matchedReqFile.extension.get.size - 1) + "xml"
-        case None => "default.xml"
       }
-
-      val allReses = (restFileDir / "responses").list(_.extension == Some("." + contentTypeToUse.ext)).toSeq
-      val matchedReses = allReses.filter(_.name == requestedFilename)
-      logger.debug(inspect(matchedReses.size))
-      // Should find one file
-      val resFile = matchedReses.head
-      logger.debug(inspect(resFile))
-      val content = resFile.contentAsString
-      logger.info(wrapForLogging("Response to put back", content))
-
-      contentTypeToUse match {
-        case ContentType.XML => Ok(Xml(content))
-        case ContentType.JSON => Ok(Json.parse(content))
-        case _ => throw new RuntimeException("A content type is out of use. contentTypeToUse: " + contentTypeToUse)
+      case _ => {
+        logger.error("Your request doesn't match XML or JSON. contentTypeToUse: " + contentTypeToUse)
+        Ok("Your request doesn't match XML or JSON. contentTypeToUse: " + contentTypeToUse)
       }
-
-    } catch {
-      case nsfe: NoSuchFileException =>  {
-        logger.error("Not Found: Your requested URI can't find a necessary file to respond.", nsfe)
-        NotFound("Not Found: Your requested URI can't find a necessary file to respond. URI: " + request.uri)
-      }
-      case e: Exception => throw e
     }
+  }
 
+
+  def contentType(request: Request[AnyContent], extensionHint: String) = {
+    // Hint is prior to Accept.
+
+    Option(extensionHint) match {
+      case Some(contentTypeHint) => {
+        ContentType.get(extensionHint).getOrElse(ContentType.XML)
+      }
+      case None => {
+        acceptType(request) match {
+          case Some(ContentType.XML) => ContentType.XML
+          case Some(ContentType.JSON) => ContentType.JSON
+          case _ =>  ContentType.XML
+          }
+      }
+    }
+  }
+
+  def contentType(request: Request[AnyContent]) = {
+      request.contentType.map(_.toLowerCase) match {
+        case Some("application/json") | Some("text/json") => "JSON"
+        case Some("application/xml") | Some("text/xml") => "XML"
+        case _ => None
+      }
+  }
+
+  def acceptType(request: Request[AnyContent]) = {
+    if (request.acceptedTypes.isEmpty) {
+      None
+    } else {
+      if (request.accepts(MimeTypes.XML)) {
+        Some(ContentType.XML)
+      }else if (request.accepts(MimeTypes.JSON)) {
+        Some(ContentType.JSON)
+      } else{
+        Some(ContentType.Unknown)
+      }
+    }
   }
 
 
   // Read/SELECT
-  // TODO call GET method
-  def getJSON(path: String) = classicGetWithStructure(path, ContentType.JSON.ext, "rest")
+  def getJSON(path: String) = doHttpMethods(path, ContentType.JSON.ext)
 
   // Create/INSERT, not idempotent
-  def postJSON(path: String) = doHttpMethodWithBody(path, ContentType.JSON.ext)
+  def postJSON(path: String) = doHttpMethods(path, ContentType.JSON.ext)
 
   // INSERT UPDATE or REPLACE, idempotent
   // PUT /collection/id
-  def putJSON(path: String) = doHttpMethodWithBody(path, ContentType.JSON.ext)
+  def putJSON(path: String) = doHttpMethods(path, ContentType.JSON.ext)
 
   // UPDATE
   // PATCH /collection/id
-  def patchJSON(path: String) = doHttpMethodWithBody(path, ContentType.XML.ext)
+  def patchJSON(path: String) = doHttpMethods(path, ContentType.XML.ext)
 
   // DELETE
   // DELETE /collection
   // DELETE /collection/id
-  def deleteJSON(path: String) = doHttpMethodWithBody(path, ContentType.JSON.ext)
+  def deleteJSON(path: String) = doHttpMethods(path, ContentType.JSON.ext)
 
 
-  def getXML(path: String) = classicGetWithStructure(path, ContentType.XML.ext, "rest")
-  def postXML(path: String) = doHttpMethodWithBody(path, ContentType.XML.ext)
-  def putXML(path: String) = doHttpMethodWithBody(path, ContentType.XML.ext)
-  def patchXML(path: String) = doHttpMethodWithBody(path, ContentType.XML.ext)
-  def deleteXML(path: String) = doHttpMethodWithBody(path, ContentType.XML.ext)
+  def getXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
+  def postXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
+  def putXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
+  def patchXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
+  def deleteXML(path: String) = doHttpMethods(path, ContentType.XML.ext)
+
 
 }
