@@ -60,10 +60,14 @@ class SpassComponents(context: Context) extends BuiltInComponentsFromContext(con
   lazy val router: Router = {
     // add the prefix string in local scope for the Routes constructor
     val prefix: String = "/"
-    wire[Routes]
+    //wire[Routes]
+    // TODO get rid of the same graph for RestMockController and ClassicUriController
+    new _root_.router.Routes(httpErrorHandler, homeController, greeterController, assets, soapMockController, restMockController, classicUriController, generalController, prefix)
   }
 
-//  implicit val configuration: Configuration
+  //val errorHandler: play.api.http.HttpErrorHandler
+
+  //  implicit val configuration: Configuration
 //  implicit val ec: ExecutionContext
 
 //  logger.debug(configuration.toString)

@@ -2,7 +2,12 @@ package controllers
 
 import java.nio.charset.Charset
 
+import com.fasterxml.jackson.core.JsonParseException
+import play.api.libs.json.JsObject
 import play.api.mvc.{AnyContent, Request}
+//import play.libs.Json
+import play.api.libs.json._
+import play.mvc.Http.MimeTypes
 
 trait WebServiceController {
   implicit val encoding = Charset.forName("UTF-8")
@@ -48,16 +53,30 @@ trait WebServiceController {
     val trimmed = scala.xml.Utility.trim(xml)
     trimmed.toString
   }
+  def trimJSON(jsonContent: String) = {
+      val json = Json.parse(jsonContent).as[JsObject]
+      json.toString
+  }
+//  def trimJSON(jsonContent: String) = {
+//    try {
+//      val json = Json.parse(jsonContent).as[JsObject]
+//      Option(json.toString)
+//    } catch {
+//      case jpe: JsonParseException => None
+//      case e: Exception => throw e;
+//    }
+//  }
+
 
   def wrapForLogging(title: String, content: String): String = {
 
     val header = "=" * 8 + " " + title + " " + "=" * 8
 
     ("\n" + Console.CYAN
-    + header + "\n"
-    + content + "\n"
-    + "=" * header.size
-    + Console.RESET)
+      + header + "\n"
+      + content + "\n"
+      + "=" * header.size
+      + Console.RESET)
   }
 
   def traceRequest(title: String, request: Request[AnyContent]) = {
@@ -73,5 +92,45 @@ trait WebServiceController {
 
     })
   }
+
+  def contentTypeOnAccept(request: Request[AnyContent], extensionHint: String) = {
+    // Hint is prior to Accept.
+
+    Option(extensionHint) match {
+      case Some(contentTypeHint) => {
+        ContentType.get(extensionHint).getOrElse(ContentType.XML)
+      }
+      case None => {
+        acceptType(request) match {
+          case Some(ContentType.XML) => ContentType.XML
+          case Some(ContentType.JSON) => ContentType.JSON
+          case _ =>  ContentType.XML
+        }
+      }
+    }
+  }
+
+  def contentTypeOnContentType(request: Request[AnyContent]) = {
+    request.contentType.map(_.toLowerCase) match {
+      case Some("application/json") | Some("text/json") => "JSON"
+      case Some("application/xml") | Some("text/xml") => "XML"
+      case _ => None
+    }
+  }
+
+  def acceptType(request: Request[AnyContent]) = {
+    if (request.acceptedTypes.isEmpty) {
+      None
+    } else {
+      if (request.accepts(MimeTypes.XML)) {
+        Some(ContentType.XML)
+      } else if (request.accepts(MimeTypes.JSON)) {
+        Some(ContentType.JSON)
+      } else{
+        Some(ContentType.Unknown)
+      }
+    }
+  }
+
 
 }

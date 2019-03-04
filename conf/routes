@@ -30,7 +30,7 @@ PATCH      /rest/json/*path              controllers.RestMockController.patchJSO
 DELETE     /rest/json/*path              controllers.RestMockController.deleteJSON(path)
 
 # REST
-GET        /rest/*path                   controllers.RestMockController.doHttpMethods(path, extensionHint ?= null)
+GET        /rest/*path                   controllers.ClassicUriController.classicGetWithStructure(path, extensionHint ?= null, baseDir ?= "rest")
 POST       /rest/*path                   controllers.RestMockController.doHttpMethods(path, extensionHint ?= null)
 PUT        /rest/*path                   controllers.RestMockController.doHttpMethods(path, extensionHint ?= null)
 PATCH      /rest/*path                   controllers.RestMockController.doHttpMethods(path, extensionHint ?= null)
@@ -42,7 +42,7 @@ GET        /classic                      controllers.ClassicUriController.classi
 POST       /classic                      controllers.SoapMockController.mapXML(path ?= "")
 GET        /classic/                     controllers.ClassicUriController.classicGet
 POST       /classic/                     controllers.SoapMockController.mapXML(path ?= "")
-GET        /classic/*path                controllers.ClassicUriController.classicGetWithStructure(path)
+GET        /classic/*path                controllers.ClassicUriController.classicGetWithStructure(path, extensionHint ?= "xml", baseDir ?= "classic")
 POST       /classic/*path                controllers.SoapMockController.mapXML(path)
 
 
