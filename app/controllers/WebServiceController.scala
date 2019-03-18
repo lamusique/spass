@@ -2,12 +2,14 @@ package controllers
 
 import java.nio.charset.Charset
 
+import play.api.Logger
 import play.api.libs.json.JsObject
 import play.api.mvc.{AnyContent, Request}
 import play.api.libs.json._
 import play.mvc.Http.MimeTypes
 
 trait WebServiceController {
+  private val logger = Logger(getClass)
   implicit val encoding = Charset.forName("UTF-8")
 
   sealed trait ContentType {
@@ -93,7 +95,9 @@ trait WebServiceController {
         acceptType(request) match {
           case Some(ContentType.XML) => ContentType.XML
           case Some(ContentType.JSON) => ContentType.JSON
-          case _ =>  ContentType.XML
+          case _ =>
+            logger.warn("No content type specified in Accept in a request header so let XML for this request's content.")
+            ContentType.XML
         }
       }
     }
