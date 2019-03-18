@@ -10,9 +10,9 @@ import play.api.routing.Router
 import router.Routes
 
 import scala.concurrent.ExecutionContext
-
 import better.files._
 import java.io.{File => JFile}
+import java.nio.charset.Charset
 
 
 /**
@@ -21,6 +21,7 @@ import java.io.{File => JFile}
 class SpassApplicationLoader extends ApplicationLoader {
 
   private val logger = Logger(getClass)
+  implicit val charset = Charset.forName("UTF-8")
 
   def load(context: Context): Application = {
     LoggerConfigurator(context.environment.classLoader).foreach {
