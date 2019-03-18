@@ -6,6 +6,7 @@
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
     <file>${application.home:-.}/logs/application.log</file>
     <encoder>
+      <charset>UTF-8</charset>
       <pattern>%date [%level] from %logger in %thread - %message%n%xException</pattern>
     </encoder>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -17,6 +18,7 @@
   <appender name="JSON" class="ch.qos.logback.core.FileAppender">
     <file>${application.home:-.}/logs/application.json</file>
     <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+      <charset>UTF-8</charset>
       <providers>
         <timestamp/>
         <message/>
