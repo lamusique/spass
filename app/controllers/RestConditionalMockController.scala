@@ -29,13 +29,23 @@ class RestConditionalMockController(
 
     val maybeTrimmedRequestBody = contentTypeToUse match {
       case ContentType.XML => request.body.asXml match {
-        case Some(xml) => Option(trimXML(xml.toString))
-        case None => None
+        case Some(xml) =>
+          val xmlString = xml.toString
+          logger.info(wrapForLogging("Requested XML body", xmlString))
+          Option(trimXML(xmlString))
+        case None =>
+          logger.info("No body content in a request for XML.")
+          None
       }
       // Expect JSON in Accept and Content-Type.
       case ContentType.JSON => request.body.asJson match {
-        case Some(json) => Option(trimJSON(json.toString))
-        case None => None
+        case Some(json) =>
+          val jsonString = json.toString
+          logger.info(wrapForLogging("Requested JSON body", jsonString))
+          Option(trimJSON(jsonString))
+        case None =>
+          logger.info("No body content in a request for JSON.")
+          None
       }
       case _ => throw new RuntimeException("A content type is out of use. contentTypeToUse: " + contentTypeToUse)
     }
