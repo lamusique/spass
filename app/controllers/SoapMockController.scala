@@ -2,7 +2,7 @@ package controllers
 
 import play.api.{Configuration, Logger}
 import play.api.i18n.Langs
-import play.api.mvc.{AbstractController, ControllerComponents}
+import play.api.mvc.{AbstractController, AnyContent, ControllerComponents, Request}
 import play.twirl.api.Html
 import play.twirl.api.Xml
 import services.GreetingService
@@ -28,11 +28,14 @@ class SoapMockController(greetingService: GreetingService,
   val soapPattern = Pattern.compile(raw".*<[^>]*Envelope[^>]*xmlns[^=]*=[^>]*>.*", Pattern.DOTALL)
 
 
-  def mapXML(path: String) = Action { request =>
+  def mapXML(path: String, soapVersion: Option[Double]) = Action { request =>
     request.body.asXml.map { xml =>
 
       logger.info(traceRequest("Received Request", request))
       logger.info(wrapForLogging("Requested XML", xml.toString))
+
+      val maybeSoapVersion = detectSoapVersion(request, soapVersion)
+      logger.info(inspect(maybeSoapVersion))
 
       val trimmedReqXml = trimXML(xml.toString)
       logger.info("trimmed requested XML=" + trimmedReqXml)
@@ -89,19 +92,30 @@ class SoapMockController(greetingService: GreetingService,
       val allReses = (soapStructuredDir / "responses").list(_.extension == Some(".xml")).toSeq
       val matchedReses = allReses.filter(_.name == requestedFilename)
       logger.debug(inspect(matchedReses.size))
-      // Should find one file
-      val resXmlFile = matchedReses.head
+      // Should find one file.
+      val resXmlFile = matchedReses.headOption match {
+        case Some(head) => head
+        case None => throw new NoSuchFileException("No matched response files.")
+      }
+
       logger.debug(inspect(resXmlFile))
       val content = resXmlFile.contentAsString
       logger.info(wrapForLogging("Response to put back", content))
 
       if (soapPattern.matcher(content).matches) {
-        // Content-Type of SOAP response of Spring WS only allows text/xml, not application/soap+xml.
-        logger.debug("SOAP response recognised.")
-        Ok(Xml(content)).as("text/xml")
+        logger.debug("A response file recognised as a SOAP format.")
+        logger.info("A SOAP response recognised.")
+        maybeSoapVersion match {
+          case Some(soapVersion) =>  Ok(Xml(content)).as(soapVersion.contentTypeValue)
+          case None =>
+            logger.warn("A SOAP response file found but a request is not SOAP.")
+            logger.warn("Treat a response as SOAP 1.2 for this time.")
+            Ok(Xml(content)).as(SoapVersion.OnePointTwo.contentTypeValue)
+        }
       } else {
-        // Not SOAP response is to be with application/xml.
-        logger.debug("Not SOAP response recognised.")
+        // A not SOAP response is to be with application/xml.
+        logger.debug("A response file not recognised as a SOAP format.")
+        logger.info("A not SOAP response recognised so as a mere XML.")
         Ok(Xml(content))
       }
 
@@ -117,6 +131,94 @@ class SoapMockController(greetingService: GreetingService,
     }.getOrElse {
       BadRequest("Expecting XML data")
     }
+  }
+
+  def detectSoapVersion(request: Request[AnyContent], soapVersionNumber: Option[Double]) = {
+
+    val maybeSoapVersionSpecified = soapVersionNumber match {
+      case Some(versionNumber) =>
+        SoapVersion.get(versionNumber) match {
+          case Some(version) => Some(version)
+          case None =>
+            logger.warn("soapVersionNumber specified but out of recognisation. soapVersionNumber: "
+              + soapVersionNumber)
+            None
+        }
+      case None => None
+    }
+
+//    SOAP 1.1
+//    POST /services/SoapService HTTP/1.1
+//    SOAPAction: "prefix:sampleAction"
+//    Content-Type: text/xml
+
+//    SOAP 1.2
+//    POST /services/SoapService HTTP/1.1
+//    Content-Type: application/soap+xml; charset=utf-8; action="prefix:sampleAction"
+
+    maybeSoapVersionSpecified match {
+      case Some(version) => Some(version)
+      case None => {
+        if (request.headers.hasHeader("SOAPAction")) {
+          // assume 1.1
+          request.contentType match {
+            case Some(contentType) =>
+              if (contentType.contains("text/xml")) {
+                Some(SoapVersion.OnePointOne)
+              } else {
+                logger.warn("SOAPAction as SOAP 1.1 specified but no Content-Type "
+                  + SoapVersion.OnePointOne.contentTypeValue + " as 1.1. contentType: "
+                  + contentType)
+                None
+              }
+            case None =>
+              logger.warn("SOAPAction as SOAP 1.1 specified but no Content-Type.")
+              None
+          }
+        } else {
+          // assume 1.2
+          request.contentType match {
+            case Some(contentType) =>
+              if (contentType.contains(SoapVersion.OnePointTwo.contentTypeValue)) {
+                Some(SoapVersion.OnePointTwo)
+              } else {
+                logger.warn("No SOAPAction specified as SOAP 1.2 but no Content-Type "
+                  + SoapVersion.OnePointTwo.contentTypeValue + " as 1.2. contentType: "
+                  + contentType)
+                None
+              }
+            case None =>
+              logger.warn("No SOAPAction specified as SOAP 1.2 but no Content-Type specified.")
+              None
+          }
+        }
+      }
+    }
+
+  }
+
+  sealed trait SoapVersion {
+    val version: Double
+    val contentTypeValue: String
+
+    override def toString: String =
+      "SOAP version " + version +
+        ", Content-Type: " + contentTypeValue
+  }
+  object SoapVersion {
+    val versionMapping = Map(
+      OnePointOne.version -> OnePointOne,
+      OnePointTwo.version -> OnePointTwo
+    )
+    case object OnePointOne extends SoapVersion {
+      override val version = 1.1
+      override val contentTypeValue = "text/xml"
+    }
+    case object OnePointTwo extends SoapVersion {
+      override val version = 1.2
+      override val contentTypeValue = "application/soap+xml"
+    }
+    def get(versionNumber: Double): Option[SoapVersion] = versionMapping.get(versionNumber)
   }
 
 }

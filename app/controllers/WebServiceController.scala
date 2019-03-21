@@ -73,7 +73,7 @@ trait WebServiceController {
   def traceRequest(title: String, request: Request[AnyContent]) = {
     wrapForLogging("Received Request", {
 
-      val uri = "URI :" + request.method + " " + request.uri
+      val uri = "URI: " + request.method + " " + request.uri
 
       (
         uri + "\n"
@@ -84,6 +84,18 @@ trait WebServiceController {
     })
   }
 
+  def contentTypeOnContentType(request: Request[AnyContent]) = {
+    request.contentType.map(_.toLowerCase) match {
+      case Some("application/json") | Some("text/json") => Some(ContentType.JSON)
+      case Some("application/xml") | Some("text/xml") => Some(ContentType.XML)
+      case _ =>
+        logger.warn("No recognisable content type specified in a request header. contentType: "
+          + request.contentType)
+        None
+    }
+  }
+
+  // This is for RESTful.
   def contentTypeOnAccept(request: Request[AnyContent], extensionHint: String) = {
     // Hint is prior to Accept.
 
@@ -96,18 +108,11 @@ trait WebServiceController {
           case Some(ContentType.XML) => ContentType.XML
           case Some(ContentType.JSON) => ContentType.JSON
           case _ =>
-            logger.warn("No content type specified in Accept in a request header so let XML for this request's content.")
+            logger.warn("No acceptable content types specified in Accept in a request header so let XML for this request's content. acceptedTypes: "
+              + request.acceptedTypes)
             ContentType.XML
         }
       }
-    }
-  }
-
-  def contentTypeOnContentType(request: Request[AnyContent]) = {
-    request.contentType.map(_.toLowerCase) match {
-      case Some("application/json") | Some("text/json") => "JSON"
-      case Some("application/xml") | Some("text/xml") => "XML"
-      case _ => None
     }
   }
 
@@ -119,11 +124,10 @@ trait WebServiceController {
         Some(ContentType.XML)
       } else if (request.accepts(MimeTypes.JSON)) {
         Some(ContentType.JSON)
-      } else{
+      } else {
         Some(ContentType.Unknown)
       }
     }
   }
-
 
 }
