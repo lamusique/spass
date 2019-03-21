@@ -10,9 +10,13 @@ GET        /assets/*file                 controllers.Assets.at(path="/public", f
 
 
 # SOAP
-POST       /soap                         controllers.SoapMockController.mapXML(path ?= "")
-POST       /soap/                        controllers.SoapMockController.mapXML(path ?= "")
-POST       /soap/*path                   controllers.SoapMockController.mapXML(path)
+POST       /soap                         controllers.SoapMockController.mapXML(path ?= "", soapVersion: Option[Double] ?= None)
+POST       /soap/                        controllers.SoapMockController.mapXML(path ?= "", soapVersion: Option[Double] ?= None)
+POST       /soap/*path                   controllers.SoapMockController.mapXML(path, soapVersion: Option[Double] ?= None)
+
+# SOAP version specified
+POST       /soap/1.1/*path               controllers.SoapMockController.mapXML(path, soapVersion: Option[Double] ?= Some(1.1))
+POST       /soap/1.2/*path               controllers.SoapMockController.mapXML(path, soapVersion: Option[Double] ?= Some(1.2))
 
 
 # simple matching REST
@@ -65,11 +69,11 @@ DELETE     /rest-cond/*path              controllers.RestConditionalMockControll
 
 # Classic GET with query strings plus SOAP
 GET        /classic                      controllers.ClassicUriController.classicGet
-POST       /classic                      controllers.SoapMockController.mapXML(path ?= "")
+POST       /classic                      controllers.SoapMockController.mapXML(path ?= "", soapVersion: Option[Double] ?= None)
 GET        /classic/                     controllers.ClassicUriController.classicGet
-POST       /classic/                     controllers.SoapMockController.mapXML(path ?= "")
+POST       /classic/                     controllers.SoapMockController.mapXML(path ?= "", soapVersion: Option[Double] ?= None)
 GET        /classic/*path                controllers.ClassicUriController.classicGetWithStructure(path, extensionHint ?= "xml", baseDir ?= "classic")
-POST       /classic/*path                controllers.SoapMockController.mapXML(path)
+POST       /classic/*path                controllers.SoapMockController.mapXML(path, soapVersion: Option[Double] ?= None)
 
 
 GET        /*path                        controllers.GeneralController.index(path)
