@@ -48,6 +48,7 @@ class ClassicUriController(
       val allReqs = (classicGetFileDir / "requests").list(_.extension == Some(".conf")).toSeq
       import collection.JavaConverters._
       val matchedReqs = allReqs.filter(file => {
+        logger.debug(inspect(file))
         val conf = ConfigFactory.parseFile(file.toJava)
         logger.debug(inspect(conf))
         val entries = conf.entrySet.asScala
@@ -55,16 +56,17 @@ class ClassicUriController(
         val matchedEvals = entries.map(entry => {
           queryStrings.get(entry.getKey) match {
             case Some(queryVals) => {
+              logger.trace(inspect(queryVals))
               if (queryVals.size > 1) {
                 logger.warn("A duplicated key of a query string found. key: " + entry.getKey)
               }
               val expectedVal = entry.getValue.unwrapped.toString
               val evaled = queryVals.map(queryVal => {
-                logger.debug(inspect(queryVal))
-                logger.debug(inspect(expectedVal))
+                logger.trace(inspect(queryVal))
+                logger.trace(inspect(expectedVal))
                 queryVal == expectedVal
               })
-              logger.debug(inspect(evaled))
+              logger.trace(inspect(evaled))
               val notMatched = evaled.filter(_ == false)
               notMatched.isEmpty
             }
