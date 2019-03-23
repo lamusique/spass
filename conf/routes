@@ -5,6 +5,8 @@ GET        /                             controllers.HomeController.index
 GET        /index                        controllers.GreeterController.index
 GET        /greetings                    controllers.GreeterController.greetings
 GET        /greet                        controllers.GreeterController.greetInMyLanguage
+# If no param as a query string 400 Bad Request.
+GET        /parameter                    controllers.GreeterController.parameter(param: String)
 
 GET        /assets/*file                 controllers.Assets.at(path="/public", file)
 
@@ -74,6 +76,18 @@ GET        /classic/                     controllers.ClassicUriController.classi
 POST       /classic/                     controllers.SoapMockController.mapXML(path ?= "", soapVersion: Option[Double] ?= None)
 GET        /classic/*path                controllers.ClassicUriController.classicGetWithStructure(path, extensionHint ?= "xml", baseDir ?= "classic")
 POST       /classic/*path                controllers.SoapMockController.mapXML(path, soapVersion: Option[Double] ?= None)
+
+
+# Classic form POST with application/x-www-form-urlencoded
+POST       /form                         controllers.ClassicFormController.postForm(path ?= "", extensionHint ?= "xml", baseDir ?= "form")
+POST       /form/*path                   controllers.ClassicFormController.postForm(path, extensionHint ?= "xml", baseDir ?= "form")
+
+
+# Classic form POST with application/x-www-form-urlencoded
+POST       /file/download                controllers.FileController.download(path ?= "", extensionHint ?= "xml", baseDir ?= "file")
+POST       /file/download/*path          controllers.FileController.download(path, extensionHint ?= "xml", baseDir ?= "file")
+POST       /file/upload                  controllers.FileController.upload(path ?= "", extensionHint ?= "xml", baseDir ?= "file")
+POST       /file/upload/*path            controllers.FileController.upload(path, extensionHint ?= "xml", baseDir ?= "file")
 
 
 GET        /*path                        controllers.GeneralController.index(path)

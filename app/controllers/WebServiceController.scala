@@ -14,33 +14,39 @@ trait WebServiceController {
 
   sealed trait ContentType {
     val code: Int
-    val ext: String
+    val ext: Option[String]
     val contentTypeValue: String
   }
   object ContentType {
-    val extensionMapping = Map(
-      XML.ext -> XML,
-      JSON.ext -> JSON
+    val extensionMapping: Map[String, ContentType] = Map(
+      XML.ext.get -> XML,
+      JSON.ext.get -> JSON
     )
 
     def get(extension: String) = extensionMapping.get(extension)
 
-    case object Unknown extends ContentType {
-      override val code: Int = 0
-      override val ext: String = "unknown"
-      override val contentTypeValue: String = "application/octet-stream"
+    case object OctetStream extends ContentType {
+      override val code = 0
+      override val ext = None
+      override val contentTypeValue = "application/octet-stream"
     }
 
     case object XML extends ContentType {
-      override val code: Int = 1
-      override val ext: String = "xml"
-      override val contentTypeValue: String = "application/xml"
+      override val code = 1
+      override val ext = Some("xml")
+      override val contentTypeValue = "application/xml"
     }
 
     case object JSON extends ContentType {
-      override val code: Int = 2
-      override val ext: String = "json"
+      override val code = 2
+      override val ext = Some("json")
       override val contentTypeValue: String = "application/json"
+    }
+
+    case object FormUrlEncoded extends ContentType {
+      override val code = 3
+      override val ext = None
+      override val contentTypeValue: String = "application/x-www-form-urlencoded"
     }
 
   }
@@ -125,7 +131,9 @@ trait WebServiceController {
       } else if (request.accepts(MimeTypes.JSON)) {
         Some(ContentType.JSON)
       } else {
-        Some(ContentType.Unknown)
+        logger.debug("No recognisable accept types. acceptedTypes: "
+          + request.acceptedTypes)
+        None
       }
     }
   }
