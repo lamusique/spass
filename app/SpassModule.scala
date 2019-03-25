@@ -4,6 +4,8 @@ import play.api.i18n.Langs
 import play.api.mvc.ControllerComponents
 import services.ServicesModule
 
+import scala.concurrent.ExecutionContext
+
 trait SpassModule extends ServicesModule {
 
   import com.softwaremill.macwire._
@@ -21,6 +23,7 @@ trait SpassModule extends ServicesModule {
   def langs: Langs
   def configuration: Configuration
   def controllerComponents: ControllerComponents
+  def executionContext: ExecutionContext
   implicit def assetsFinder: AssetsFinder
 
 }

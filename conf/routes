@@ -84,6 +84,8 @@ POST       /form/*path                   controllers.ClassicFormController.postF
 
 
 # Classic form POST with application/x-www-form-urlencoded
+GET        /file/download                controllers.FileController.download(path ?= "", extensionHint ?= "xml", baseDir ?= "file")
+GET        /file/download/*path          controllers.FileController.download(path, extensionHint ?= "xml", baseDir ?= "file")
 POST       /file/download                controllers.FileController.download(path ?= "", extensionHint ?= "xml", baseDir ?= "file")
 POST       /file/download/*path          controllers.FileController.download(path, extensionHint ?= "xml", baseDir ?= "file")
 POST       /file/upload                  controllers.FileController.upload(path ?= "", extensionHint ?= "xml", baseDir ?= "file")
