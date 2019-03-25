@@ -50,9 +50,8 @@ class SoapMockController(greetingService: GreetingService,
       val soapStructuredDir = splitted.foldLeft(soapDir)((z, n) => z / n)
 
       try {
-
-      val allXMLReqs = (soapStructuredDir / "requests").list(_.extension == Some(".xml")).toSeq
-      val matchedXMLReqs = allXMLReqs.filter(file => {
+        val allXMLReqs = (soapStructuredDir / "requests").list(_.extension == Some(".xml")).toSeq
+        val matchedXMLReqs = allXMLReqs.filter(file => {
         val expectedXmlContent = file.contentAsString
         val trimmedExpectedXml = trimXML(expectedXmlContent)
 
