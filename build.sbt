@@ -16,7 +16,7 @@ unmanagedResourceDirectories in Compile += baseDirectory.value / "resources"
 
 
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.1" % Test
-libraryDependencies += "com.softwaremill.macwire" %% "macros" % "2.3.1" % "provided"
+libraryDependencies += "com.softwaremill.macwire" %% "macros" % "2.3.2" % "provided"
 
 libraryDependencies += "com.github.pathikrit" %% "better-files" % "3.7.0"
 
