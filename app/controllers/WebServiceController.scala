@@ -16,37 +16,43 @@ trait WebServiceController {
     val code: Int
     val ext: Option[String]
     val contentTypeValue: String
+    val mediaSubType: String
   }
   object ContentType {
     val extensionMapping: Map[String, ContentType] = Map(
-      XML.ext.get -> XML,
-      JSON.ext.get -> JSON
+      XML.mediaSubType -> XML,
+      JSON.mediaSubType -> JSON,
+      FormUrlEncoded.mediaSubType -> FormUrlEncoded
     )
 
-    def get(extension: String) = extensionMapping.get(extension)
+    def valueOf(mediaSubType: String) = extensionMapping.get(mediaSubType)
 
     case object OctetStream extends ContentType {
       override val code = 0
       override val ext = None
       override val contentTypeValue = "application/octet-stream"
+      override val mediaSubType = "octet-stream"
     }
 
     case object XML extends ContentType {
       override val code = 1
       override val ext = Some("xml")
       override val contentTypeValue = "application/xml"
+      override val mediaSubType = "xml"
     }
 
     case object JSON extends ContentType {
       override val code = 2
       override val ext = Some("json")
-      override val contentTypeValue: String = "application/json"
+      override val contentTypeValue = "application/json"
+      override val mediaSubType = "json"
     }
 
     case object FormUrlEncoded extends ContentType {
       override val code = 3
       override val ext = None
-      override val contentTypeValue: String = "application/x-www-form-urlencoded"
+      override val contentTypeValue = "application/x-www-form-urlencoded"
+      override val mediaSubType = "x-www-form-urlencoded"
     }
 
   }
@@ -107,7 +113,7 @@ trait WebServiceController {
 
     Option(extensionHint) match {
       case Some(contentTypeHint) => {
-        ContentType.get(extensionHint).getOrElse(ContentType.XML)
+        ContentType.valueOf(extensionHint).getOrElse(ContentType.XML)
       }
       case None => {
         acceptType(request) match {
