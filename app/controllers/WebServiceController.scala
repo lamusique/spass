@@ -27,13 +27,6 @@ trait WebServiceController {
 
     def valueOf(mediaSubType: String) = extensionMapping.get(mediaSubType)
 
-    case object OctetStream extends ContentType {
-      override val code = 0
-      override val ext = None
-      override val contentTypeValue = "application/octet-stream"
-      override val mediaSubType = "octet-stream"
-    }
-
     case object XML extends ContentType {
       override val code = 1
       override val ext = Some("xml")
@@ -53,6 +46,13 @@ trait WebServiceController {
       override val ext = None
       override val contentTypeValue = "application/x-www-form-urlencoded"
       override val mediaSubType = "x-www-form-urlencoded"
+    }
+
+    case object OctetStream extends ContentType {
+      override val code = 4
+      override val ext = None
+      override val contentTypeValue = "application/octet-stream"
+      override val mediaSubType = "octet-stream"
     }
 
   }
